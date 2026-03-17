@@ -608,7 +608,7 @@ async function handleConfirmImport() {
                   <td class="px-4 py-3 text-center">
                     <div class="flex items-center justify-center gap-2">
                       <button
-                        class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50"
+                        class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50"
                         @click="handleEdit(product)"
                       >編輯</button>
                       <button
@@ -764,7 +764,7 @@ async function handleConfirmImport() {
               </td>
               <td class="px-4 py-3 text-center">
                 <div class="flex items-center justify-center gap-2">
-                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50" @click="openEditCompany(company)">編輯</button>
+                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50" @click="openEditCompany(company)">編輯</button>
                   <button class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50" @click="handleDeleteCompany(company.id)">刪除</button>
                 </div>
               </td>
@@ -871,7 +871,7 @@ async function handleConfirmImport() {
               v-for="cat in categories"
               :key="cat.id"
               class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
-              :class="importCategoryId === cat.id ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-600 hover:border-gray-300'"
+              :class="importCategoryId === cat.id ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-800 hover:border-gray-300'"
               @click="importCategoryId = cat.id"
             >{{ cat.name }}</button>
           </div>
@@ -888,7 +888,7 @@ async function handleConfirmImport() {
 
         <div class="flex gap-3">
           <button
-            class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+            class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
             @click="showImportDialog = false"
           >取消</button>
           <button

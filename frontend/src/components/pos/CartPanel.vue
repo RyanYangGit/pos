@@ -83,7 +83,7 @@ async function handleConfirm() {
             class="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-lg border-2 text-sm font-medium transition-all active:scale-95"
             :class="selectedPayment === method.value
               ? 'border-accent bg-red-50 text-accent'
-              : 'border-gray-200 bg-white text-gray-600'"
+              : 'border-gray-200 bg-white text-gray-900'"
             @click="selectedPayment = method.value"
           >
             <span>{{ method.icon }}</span>

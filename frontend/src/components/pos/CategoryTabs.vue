@@ -18,7 +18,7 @@ const emit = defineEmits<{
       class="shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
       :class="activeId === null
         ? 'bg-primary text-white'
-        : 'bg-white text-gray-600 border border-gray-200'"
+        : 'bg-white text-gray-900 border border-gray-300'"
       @click="emit('select', null)"
     >
       {{ LOCALE.allCategories }}
@@ -29,7 +29,7 @@ const emit = defineEmits<{
       class="shrink-0 px-4 py-2 rounded-full text-sm font-medium"
       :class="activeId === cat.id
         ? 'bg-primary text-white'
-        : 'bg-white text-gray-600 border border-gray-200'"
+        : 'bg-white text-gray-900 border border-gray-300'"
       @click="emit('select', cat.id)"
     >
       {{ cat.name }}

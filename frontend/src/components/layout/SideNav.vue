@@ -73,27 +73,27 @@ function handleUpdate() {
       <!-- Popup menu -->
       <div
         v-if="showMenu"
-        class="absolute bottom-full left-full ml-1 mb-1 w-36 bg-white rounded-xl border border-gray-200 overflow-hidden z-50"
+        class="absolute bottom-full left-full ml-1 mb-1 w-40 bg-primary-light rounded-xl border border-white/20 overflow-hidden z-50"
       >
         <button
-          class="w-full px-4 py-3 text-sm text-gray-800 text-left active:bg-gray-100 flex items-center gap-2"
+          class="w-full px-4 py-3 text-sm text-white font-medium text-left active:bg-white/10 flex items-center gap-2"
           @click="handleLock"
         >
-          <van-icon name="lock" size="16" color="#333" />
+          <van-icon name="lock" size="16" color="#fff" />
           鎖定螢幕
         </button>
         <button
-          class="w-full px-4 py-3 text-sm text-gray-800 text-left active:bg-gray-100 flex items-center gap-2 border-t border-gray-100"
+          class="w-full px-4 py-3 text-sm text-white font-medium text-left active:bg-white/10 flex items-center gap-2 border-t border-white/10"
           @click="handleUpdate"
         >
-          <van-icon name="replay" size="16" color="#333" />
+          <van-icon name="replay" size="16" color="#fff" />
           檢查更新
         </button>
         <button
-          class="w-full px-4 py-3 text-sm text-red-500 text-left active:bg-red-50 flex items-center gap-2 border-t border-gray-100"
+          class="w-full px-4 py-3 text-sm text-red-300 font-medium text-left active:bg-white/10 flex items-center gap-2 border-t border-white/10"
           @click="handleLogout"
         >
-          <van-icon name="revoke" size="16" color="#ee0a24" />
+          <van-icon name="revoke" size="16" color="#fca5a5" />
           登出
         </button>
       </div>

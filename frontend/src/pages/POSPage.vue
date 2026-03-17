@@ -186,7 +186,7 @@ function handleCameraScanned(code: string) {
             </button>
           </div>
           <button
-            class="shrink-0 h-11 px-3 rounded-xl bg-primary text-white text-sm font-medium flex items-center gap-1 active:scale-95"
+            class="shrink-0 h-11 px-3 rounded-xl bg-accent text-white text-sm font-bold flex items-center gap-1 active:scale-95"
             @click="showCameraScanner = true"
           >
             <van-icon name="scan" size="18" />
