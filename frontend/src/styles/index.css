@@ -65,12 +65,4 @@ body {
 /* Override Vant's button reset that forces color to --van-text-color (#323233) */
 button:not(.van-button) {
   color: inherit !important;
-  background: transparent;
-  border: none;
-  height: auto;
-  line-height: inherit;
-  font-size: inherit;
-  text-align: inherit;
-  border-radius: 0;
-  padding: 0;
 }
