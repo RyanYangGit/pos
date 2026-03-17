@@ -186,8 +186,7 @@ function handleCameraScanned(code: string) {
             </button>
           </div>
           <button
-            class="shrink-0 h-11 px-3 rounded-xl text-sm font-bold flex items-center gap-1 active:scale-95"
-            style="background:#e94560;color:#fff"
+            class="shrink-0 h-11 px-3 rounded-xl text-sm font-bold flex items-center gap-1 active:scale-95 scan-btn"
             @click="showCameraScanner = true"
           >
             <van-icon name="scan" size="18" color="#fff" />
@@ -227,3 +226,10 @@ function handleCameraScanned(code: string) {
     @scanned="handleCameraScanned"
   />
 </template>
+
+<style scoped>
+.scan-btn {
+  background: #1a1a2e !important;
+  color: #fff !important;
+}
+</style>
