@@ -47,59 +47,57 @@ function handleClose() {
     :style="{ maxHeight: '90%' }"
     @update:show="handleClose"
   >
-    <div class="px-6 pt-8 pb-6">
-      <h2 class="text-xl font-bold text-center text-gray-800 mb-4">{{ LOCALE.checkoutTitle }}</h2>
+    <div class="px-4 pt-5 pb-4">
+      <h2 class="fw-bold text-center mb-3 checkout-title">{{ LOCALE.checkoutTitle }}</h2>
 
-      <div class="text-center text-gray-500 mb-2">
+      <div class="text-center mb-2 checkout-subtitle">
         商品 {{ totalItems }} {{ LOCALE.items }}
       </div>
 
-      <div class="text-center text-3xl font-bold text-gray-900 mb-6">
+      <div class="text-center fw-bold mb-4 checkout-amount">
         {{ formatCurrency(totalAmount) }}
       </div>
 
       <!-- Payment Methods -->
-      <div class="mb-4">
-        <div class="text-sm text-gray-500 mb-3">{{ LOCALE.paymentMethod }}</div>
-        <div class="grid grid-cols-3 gap-3">
+      <div class="mb-3">
+        <div class="small mb-3 section-label">{{ LOCALE.paymentMethod }}</div>
+        <div class="payment-grid">
           <button
             v-for="method in PAYMENT_METHODS"
             :key="method.value"
-            class="flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all active:scale-95"
-            :class="selectedPayment === method.value
-              ? 'border-accent bg-red-50'
-              : 'border-gray-200 bg-white'"
+            class="btn d-flex flex-column align-items-center justify-content-center p-3 payment-option"
+            :class="selectedPayment === method.value ? 'payment-active' : 'payment-inactive'"
             @click="selectedPayment = method.value"
           >
-            <span class="text-3xl mb-1">{{ method.icon }}</span>
-            <span class="text-sm font-medium">{{ method.label }}</span>
+            <span class="payment-icon mb-1">{{ method.icon }}</span>
+            <span class="small fw-medium">{{ method.label }}</span>
           </button>
         </div>
       </div>
 
       <!-- Note -->
-      <div class="mb-6">
-        <div class="text-sm text-gray-500 mb-2">{{ LOCALE.note }}</div>
+      <div class="mb-4">
+        <div class="small mb-2 section-label">{{ LOCALE.note }}</div>
         <van-field
           v-model="note"
           :placeholder="LOCALE.notePlaceholder"
           type="textarea"
           rows="1"
           autosize
-          class="rounded-lg !bg-gray-50"
+          class="rounded note-field"
         />
       </div>
 
       <!-- Actions -->
-      <div class="flex gap-3">
+      <div class="d-flex gap-3">
         <button
-          class="flex-1 h-14 rounded-xl text-base font-medium border border-gray-300 text-gray-800 transition-all active:scale-[0.98] active:bg-gray-50"
+          class="btn flex-grow-1 fw-medium border action-cancel"
           @click="handleClose"
         >
           {{ LOCALE.cancel }}
         </button>
         <button
-          class="flex-1 h-14 rounded-xl text-base font-bold text-white bg-accent transition-all active:scale-[0.98]"
+          class="btn flex-grow-1 fw-bold action-confirm"
           :disabled="loading"
           @click="handleConfirm"
         >
@@ -109,3 +107,81 @@ function handleClose() {
     </div>
   </van-popup>
 </template>
+
+<style scoped>
+.checkout-title {
+  font-size: 1.25rem;
+  color: var(--c-text);
+}
+.checkout-subtitle {
+  color: var(--c-text-muted);
+}
+.checkout-amount {
+  font-size: 1.875rem;
+  color: var(--c-text);
+}
+.section-label {
+  color: var(--c-text-muted);
+}
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+.payment-option {
+  border-radius: var(--radius);
+  border-width: 2px;
+  border-style: solid;
+  min-height: 44px;
+}
+.payment-active {
+  border-color: var(--c-accent);
+  background-color: #fef2f2;
+}
+.payment-active:hover {
+  background-color: #fef2f2;
+  border-color: var(--c-accent);
+}
+.payment-inactive {
+  border-color: var(--c-border);
+  background-color: #fff;
+}
+.payment-inactive:hover {
+  background-color: #fff;
+  border-color: var(--c-border);
+}
+.payment-icon {
+  font-size: 1.875rem;
+}
+.note-field {
+  background-color: var(--c-surface) !important;
+}
+.action-cancel {
+  height: 56px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  border-color: var(--c-border);
+  color: var(--c-text);
+  min-height: 44px;
+}
+.action-cancel:hover,
+.action-cancel:active {
+  background-color: var(--c-surface);
+  color: var(--c-text);
+}
+.action-confirm {
+  height: 56px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background-color: var(--c-accent);
+  border-color: var(--c-accent);
+  color: #fff;
+  min-height: 44px;
+}
+.action-confirm:hover,
+.action-confirm:active {
+  background-color: var(--c-accent);
+  border-color: var(--c-accent);
+  color: #fff;
+}
+</style>

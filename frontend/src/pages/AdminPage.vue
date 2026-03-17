@@ -438,44 +438,44 @@ async function handleConfirmImport() {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-gray-50">
+  <div class="admin-page d-flex flex-column bg-surface h-100">
     <!-- Header -->
-    <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-6">
-        <h1 class="text-lg font-bold text-gray-800">後台管理</h1>
-        <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+    <div class="bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between flex-shrink-0">
+      <div class="d-flex align-items-center gap-4">
+        <h1 class="fs-5 fw-bold text-primary mb-0">後台管理</h1>
+        <div class="tab-group d-flex gap-1 p-1 rounded">
           <button
             v-if="!isSuperAdmin"
-            class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-            :class="activeTab === 'products' ? 'bg-white text-gray-800 ' : 'text-gray-500 hover:text-gray-700'"
+            class="tab-btn"
+            :class="activeTab === 'products' ? 'tab-btn--active' : ''"
             @click="activeTab = 'products'"
           >商品管理</button>
           <button
             v-if="!isSuperAdmin"
-            class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-            :class="activeTab === 'categories' ? 'bg-white text-gray-800 ' : 'text-gray-500 hover:text-gray-700'"
+            class="tab-btn"
+            :class="activeTab === 'categories' ? 'tab-btn--active' : ''"
             @click="activeTab = 'categories'"
           >分類管理</button>
           <button
-            class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-            :class="activeTab === 'users' ? 'bg-white text-gray-800 ' : 'text-gray-500 hover:text-gray-700'"
+            class="tab-btn"
+            :class="activeTab === 'users' ? 'tab-btn--active' : ''"
             @click="activeTab = 'users'; loadUsers()"
           >帳號管理</button>
           <button
             v-if="isSuperAdmin"
-            class="px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-            :class="activeTab === 'companies' ? 'bg-white text-gray-800 ' : 'text-gray-500 hover:text-gray-700'"
+            class="tab-btn"
+            :class="activeTab === 'companies' ? 'tab-btn--active' : ''"
             @click="activeTab = 'companies'; loadCompanies()"
           >公司管理</button>
         </div>
       </div>
 
       <!-- Company selector (super_admin only, for products/categories tabs) -->
-      <div v-if="isSuperAdmin && (activeTab === 'products' || activeTab === 'categories')" class="flex items-center gap-3">
-        <label class="text-sm text-gray-500 shrink-0">選擇公司</label>
+      <div v-if="isSuperAdmin && (activeTab === 'products' || activeTab === 'categories')" class="d-flex align-items-center gap-3">
+        <label class="small text-muted flex-shrink-0">選擇公司</label>
         <select
           v-model="selectedCompanyId"
-          class="h-9 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white min-w-[160px]"
+          class="form-select form-select-sm select-custom"
         >
           <option value="">— 請選擇公司 —</option>
           <option v-for="c in companies" :key="c.id" :value="c.id">{{ c.name }}</option>
@@ -483,25 +483,16 @@ async function handleConfirmImport() {
       </div>
 
       <!-- Actions (products tab) -->
-      <div v-if="activeTab === 'products' && (!isSuperAdmin || selectedCompanyId)" class="flex items-center gap-2">
-        <button
-          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-1.5"
-          @click="downloadTemplate"
-        >
+      <div v-if="activeTab === 'products' && (!isSuperAdmin || selectedCompanyId)" class="d-flex align-items-center gap-2">
+        <button class="btn-outline d-flex align-items-center gap-1" @click="downloadTemplate">
           <van-icon name="down" size="14" />
           下載範本
         </button>
-        <button
-          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-1.5"
-          @click="triggerImport"
-        >
+        <button class="btn-outline d-flex align-items-center gap-1" @click="triggerImport">
           <van-icon name="down" size="14" />
           匯入 Excel
         </button>
-        <button
-          class="h-9 px-4 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 flex items-center gap-1.5"
-          @click="handleAdd"
-        >
+        <button class="btn-primary d-flex align-items-center gap-1" @click="handleAdd">
           <van-icon name="plus" size="14" />
           新增商品
         </button>
@@ -509,74 +500,73 @@ async function handleConfirmImport() {
     </div>
 
     <!-- Products Tab -->
-    <div v-if="activeTab === 'products'" class="flex-1 overflow-auto">
+    <div v-if="activeTab === 'products'" class="flex-grow-1 overflow-auto">
       <!-- No company selected (super_admin) -->
-      <div v-if="isSuperAdmin && !selectedCompanyId" class="flex items-center justify-center h-full">
-        <div class="text-center text-gray-400">
-          <van-icon name="office-o" size="48" class="mb-3 opacity-30" />
-          <p class="text-sm">請先在右上角選擇公司</p>
+      <div v-if="isSuperAdmin && !selectedCompanyId" class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-muted">
+          <van-icon name="office-o" size="48" class="mb-3 opacity-25" />
+          <p class="small">請先在右上角選擇公司</p>
         </div>
       </div>
 
       <template v-else>
         <!-- Filter bar -->
-        <div class="px-6 py-3 flex gap-3 items-center bg-white border-b border-gray-100">
-          <div class="relative">
-            <van-icon name="search" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div class="px-4 py-3 d-flex gap-3 align-items-center bg-white border-bottom">
+          <div class="position-relative">
+            <van-icon name="search" size="15" class="search-icon" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="搜尋商品名稱或條碼..."
-              class="pl-8 pr-3 h-9 w-60 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary"
+              class="form-control form-control-sm search-input"
             />
           </div>
           <select
             v-model="filterCategoryId"
-            class="h-9 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white"
+            class="form-select form-select-sm select-custom"
           >
             <option value="">所有分類</option>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
           </select>
-          <span class="text-sm text-gray-400 ml-auto">共 {{ filteredProducts.length }} 項</span>
+          <span class="small text-muted ms-auto">共 {{ filteredProducts.length }} 項</span>
         </div>
 
         <!-- Table -->
-        <div class="px-6 py-4">
-          <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <table class="w-full text-sm">
+        <div class="px-4 py-3">
+          <div class="bg-white rounded border overflow-hidden">
+            <table class="table table-sm mb-0 admin-table">
               <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
-                  <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">商品名稱</th>
-                  <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">分類</th>
-                  <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">條碼</th>
-                  <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">價格</th>
-                  <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">庫存</th>
-                  <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">狀態</th>
-                  <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">操作</th>
+                <tr>
+                  <th class="text-start">商品名稱</th>
+                  <th class="text-start">分類</th>
+                  <th class="text-start">條碼</th>
+                  <th class="text-end">價格</th>
+                  <th class="text-center">庫存</th>
+                  <th class="text-center">狀態</th>
+                  <th class="text-center">操作</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody>
                 <tr v-if="filteredProducts.length === 0">
-                  <td colspan="7" class="text-center py-16 text-gray-400">尚無商品</td>
+                  <td colspan="7" class="text-center py-5 text-muted">尚無商品</td>
                 </tr>
                 <tr
                   v-for="product in filteredProducts"
                   :key="product.id"
-                  class="hover:bg-gray-50 transition-colors"
                   :class="{ 'opacity-50': !product.isActive }"
                 >
-                  <td class="px-4 py-3 font-medium text-gray-800">{{ product.name }}</td>
-                  <td class="px-4 py-3 text-gray-500">{{ getCategoryName(product.categoryId) }}</td>
-                  <td class="px-4 py-3 text-gray-400 font-mono text-xs">{{ product.barcode || '—' }}</td>
-                  <td class="px-4 py-3 text-right font-semibold text-gray-800">{{ formatCurrency(product.price) }}</td>
+                  <td class="fw-medium text-primary">{{ product.name }}</td>
+                  <td class="text-muted">{{ getCategoryName(product.categoryId) }}</td>
+                  <td class="text-muted font-monospace extra-small">{{ product.barcode || '—' }}</td>
+                  <td class="text-end fw-semibold text-primary num">{{ formatCurrency(product.price) }}</td>
 
                   <!-- Inline stock edit -->
-                  <td class="px-4 py-3 text-center">
-                    <div v-if="editingStockId === product.id" class="flex items-center justify-center gap-1">
+                  <td class="text-center">
+                    <div v-if="editingStockId === product.id" class="d-flex align-items-center justify-content-center gap-1">
                       <input
                         v-model="editingStockValue"
                         type="number"
-                        class="w-20 h-7 px-2 rounded border border-primary text-center text-sm focus:outline-none"
+                        class="form-control form-control-sm stock-input"
                         placeholder="不限"
                         autofocus
                         @keydown.enter="commitStock(product)"
@@ -586,7 +576,7 @@ async function handleConfirmImport() {
                     </div>
                     <button
                       v-else
-                      class="px-2 py-1 rounded hover:bg-gray-100 text-gray-800 min-w-[3rem]"
+                      class="btn-stock-edit"
                       @click="startEditStock(product)"
                     >
                       {{ product.stock !== null ? product.stock : '不限' }}
@@ -594,10 +584,10 @@ async function handleConfirmImport() {
                   </td>
 
                   <!-- Status toggle -->
-                  <td class="px-4 py-3 text-center">
+                  <td class="text-center">
                     <span
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer select-none"
-                      :class="product.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                      class="status-badge"
+                      :class="product.isActive ? 'status-active' : 'status-inactive'"
                       @click="apiToggleProduct(product.id)"
                     >
                       {{ product.isActive ? '上架中' : '已下架' }}
@@ -605,16 +595,10 @@ async function handleConfirmImport() {
                   </td>
 
                   <!-- Actions -->
-                  <td class="px-4 py-3 text-center">
-                    <div class="flex items-center justify-center gap-2">
-                      <button
-                        class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50"
-                        @click="handleEdit(product)"
-                      >編輯</button>
-                      <button
-                        class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50"
-                        @click="handleDeleteProduct(product.id)"
-                      >刪除</button>
+                  <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                      <button class="btn-outline btn-sm" @click="handleEdit(product)">編輯</button>
+                      <button class="btn-danger-outline btn-sm" @click="handleDeleteProduct(product.id)">刪除</button>
                     </div>
                   </td>
                 </tr>
@@ -626,100 +610,94 @@ async function handleConfirmImport() {
     </div>
 
     <!-- Categories Tab -->
-    <div v-else-if="activeTab === 'categories'" class="flex-1 overflow-auto px-6 py-4">
+    <div v-else-if="activeTab === 'categories'" class="flex-grow-1 overflow-auto px-4 py-3">
       <!-- No company selected (super_admin) -->
-      <div v-if="isSuperAdmin && !selectedCompanyId" class="flex items-center justify-center h-full">
-        <div class="text-center text-gray-400">
-          <van-icon name="office-o" size="48" class="mb-3 opacity-30" />
-          <p class="text-sm">請先在右上角選擇公司</p>
+      <div v-if="isSuperAdmin && !selectedCompanyId" class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-muted">
+          <van-icon name="office-o" size="48" class="mb-3 opacity-25" />
+          <p class="small">請先在右上角選擇公司</p>
         </div>
       </div>
 
-      <div v-else class="max-w-lg">
+      <div v-else style="max-width: 480px;">
         <!-- Add category -->
-        <div class="flex gap-2 mb-4">
+        <div class="d-flex gap-2 mb-3">
           <input
             v-model="newCategoryName"
             type="text"
             placeholder="輸入分類名稱"
-            class="flex-1 h-10 px-4 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary"
+            class="form-control form-control-sm input-custom flex-grow-1"
             @keydown.enter="handleAddCategory"
           />
           <button
-            class="h-10 px-5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 disabled:opacity-40"
+            class="btn-primary"
             :disabled="!newCategoryName.trim()"
             @click="handleAddCategory"
           >新增</button>
         </div>
 
         <!-- Category list -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div v-if="categories.length === 0" class="text-center py-12 text-gray-400 text-sm">尚無分類</div>
+        <div class="bg-white rounded border overflow-hidden">
+          <div v-if="categories.length === 0" class="text-center py-5 text-muted small">尚無分類</div>
           <div
             v-for="(cat, i) in categories"
             :key="cat.id"
-            class="flex items-center px-4 py-3 hover:bg-gray-50"
-            :class="{ 'border-t border-gray-100': i > 0 }"
+            class="d-flex align-items-center px-3 py-3"
+            :class="{ 'border-top': i > 0 }"
           >
-            <span class="flex-1 text-sm font-medium text-gray-800">{{ cat.name }}</span>
-            <span class="text-xs text-gray-400 mr-4">
+            <span class="flex-grow-1 small fw-medium text-primary">{{ cat.name }}</span>
+            <span class="extra-small text-muted me-3">
               {{ products.filter(p => p.categoryId === cat.id).length }} 項商品
             </span>
-            <button
-              class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50"
-              @click="handleDeleteCategory(cat.id)"
-            >刪除</button>
+            <button class="btn-danger-outline btn-sm" @click="handleDeleteCategory(cat.id)">刪除</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Users Tab -->
-    <div v-else-if="activeTab === 'users'" class="flex-1 overflow-auto px-6 py-4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-sm font-semibold text-gray-500">帳號列表</h2>
-        <button
-          class="h-9 px-4 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 flex items-center gap-1.5"
-          @click="openAddUser"
-        >
+    <div v-else-if="activeTab === 'users'" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="small fw-semibold text-muted mb-0">帳號列表</h2>
+        <button class="btn-primary d-flex align-items-center gap-1" @click="openAddUser">
           <van-icon name="plus" size="14" />新增帳號
         </button>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table class="w-full text-sm">
+      <div class="bg-white rounded border overflow-hidden">
+        <table class="table table-sm mb-0 admin-table">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">顯示名稱</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">帳號</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">角色</th>
-              <th v-if="isSuperAdmin" class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">公司</th>
-              <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">操作</th>
+            <tr>
+              <th class="text-start">顯示名稱</th>
+              <th class="text-start">帳號</th>
+              <th class="text-start">角色</th>
+              <th v-if="isSuperAdmin" class="text-start">公司</th>
+              <th class="text-center">操作</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody>
             <tr v-if="users.length === 0">
-              <td colspan="5" class="text-center py-12 text-gray-400">尚無帳號</td>
+              <td colspan="5" class="text-center py-5 text-muted">尚無帳號</td>
             </tr>
-            <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-800">{{ user.displayName }}</td>
-              <td class="px-4 py-3 text-gray-500">{{ user.username }}</td>
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+            <tr v-for="user in users" :key="user.id">
+              <td class="fw-medium text-primary">{{ user.displayName }}</td>
+              <td class="text-muted">{{ user.username }}</td>
+              <td>
+                <span class="badge-role"
                   :class="{
-                    'bg-purple-100 text-purple-700': user.role === 'super_admin',
-                    'bg-blue-100 text-blue-700': user.role === 'admin',
-                    'bg-gray-100 text-gray-600': user.role === 'cashier',
+                    'badge-super': user.role === 'super_admin',
+                    'badge-admin': user.role === 'admin',
+                    'badge-cashier': user.role === 'cashier',
                   }">
                   {{ user.role === 'super_admin' ? '平台管理員' : user.role === 'admin' ? '管理員' : '收銀員' }}
                 </span>
               </td>
-              <td v-if="isSuperAdmin" class="px-4 py-3 text-gray-400 text-xs">
+              <td v-if="isSuperAdmin" class="text-muted extra-small">
                 {{ companies.find(c => c.id === user.companyId)?.name || (user.role === 'super_admin' ? '—' : user.companyId) }}
               </td>
-              <td class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50" @click="openEditUser(user)">編輯</button>
-                  <button class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50" @click="handleDeleteUser(user.id)">刪除</button>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <button class="btn-outline btn-sm" @click="openEditUser(user)">編輯</button>
+                  <button class="btn-danger-outline btn-sm" @click="handleDeleteUser(user.id)">刪除</button>
                 </div>
               </td>
             </tr>
@@ -729,43 +707,39 @@ async function handleConfirmImport() {
     </div>
 
     <!-- Companies Tab (super_admin only) -->
-    <div v-else-if="activeTab === 'companies' && isSuperAdmin" class="flex-1 overflow-auto px-6 py-4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-sm font-semibold text-gray-500">公司列表</h2>
-        <button
-          class="h-9 px-4 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 flex items-center gap-1.5"
-          @click="openAddCompany"
-        >
+    <div v-else-if="activeTab === 'companies' && isSuperAdmin" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="small fw-semibold text-muted mb-0">公司列表</h2>
+        <button class="btn-primary d-flex align-items-center gap-1" @click="openAddCompany">
           <van-icon name="plus" size="14" />新增公司
         </button>
       </div>
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table class="w-full text-sm">
+      <div class="bg-white rounded border overflow-hidden">
+        <table class="table table-sm mb-0 admin-table">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">公司名稱</th>
-              <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">ID</th>
-              <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">狀態</th>
-              <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">操作</th>
+            <tr>
+              <th class="text-start">公司名稱</th>
+              <th class="text-start">ID</th>
+              <th class="text-center">狀態</th>
+              <th class="text-center">操作</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody>
             <tr v-if="companies.length === 0">
-              <td colspan="4" class="text-center py-12 text-gray-400">尚無公司</td>
+              <td colspan="4" class="text-center py-5 text-muted">尚無公司</td>
             </tr>
-            <tr v-for="company in companies" :key="company.id" class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-800">{{ company.name }}</td>
-              <td class="px-4 py-3 text-gray-400 font-mono text-xs">{{ company.id }}</td>
-              <td class="px-4 py-3 text-center">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                  :class="company.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'">
+            <tr v-for="company in companies" :key="company.id">
+              <td class="fw-medium text-primary">{{ company.name }}</td>
+              <td class="text-muted font-monospace extra-small">{{ company.id }}</td>
+              <td class="text-center">
+                <span class="status-badge" :class="company.isActive ? 'status-active' : 'status-inactive'">
                   {{ company.isActive ? '啟用' : '停用' }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50" @click="openEditCompany(company)">編輯</button>
-                  <button class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50" @click="handleDeleteCompany(company.id)">刪除</button>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <button class="btn-outline btn-sm" @click="openEditCompany(company)">編輯</button>
+                  <button class="btn-danger-outline btn-sm" @click="handleDeleteCompany(company.id)">刪除</button>
                 </div>
               </td>
             </tr>
@@ -776,61 +750,61 @@ async function handleConfirmImport() {
 
     <!-- User Form Dialog -->
     <van-popup v-model:show="showUserForm" round position="center" :duration="0" :style="{ width: '440px' }">
-      <div class="px-6 pt-6 pb-5 flex flex-col gap-4">
-        <h2 class="text-base font-bold text-gray-800">{{ editingUser ? '編輯帳號' : '新增帳號' }}</h2>
-        <div class="space-y-3">
+      <div class="dialog-content px-4 pt-4 pb-4 d-flex flex-column gap-3">
+        <h2 class="fs-6 fw-bold text-primary">{{ editingUser ? '編輯帳號' : '新增帳號' }}</h2>
+        <div class="d-flex flex-column gap-3">
           <div v-if="!editingUser">
-            <label class="block text-xs text-gray-500 mb-1">帳號</label>
-            <input v-model="userForm.username" type="text" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary" />
+            <label class="form-label extra-small text-muted">帳號</label>
+            <input v-model="userForm.username" type="text" class="form-control form-control-sm input-custom" />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1">顯示名稱</label>
-            <input v-model="userForm.displayName" type="text" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary" />
+            <label class="form-label extra-small text-muted">顯示名稱</label>
+            <input v-model="userForm.displayName" type="text" class="form-control form-control-sm input-custom" />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1">密碼{{ editingUser ? '（留空則不更改）' : '' }}</label>
-            <input v-model="userForm.password" type="password" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary" />
+            <label class="form-label extra-small text-muted">密碼{{ editingUser ? '（留空則不更改）' : '' }}</label>
+            <input v-model="userForm.password" type="password" class="form-control form-control-sm input-custom" />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 mb-1">角色</label>
-            <select v-model="userForm.role" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white">
+            <label class="form-label extra-small text-muted">角色</label>
+            <select v-model="userForm.role" class="form-select form-select-sm select-custom">
               <option value="cashier">收銀員</option>
               <option value="admin">管理員</option>
               <option v-if="isSuperAdmin" value="super_admin">平台管理員</option>
             </select>
           </div>
           <div v-if="isSuperAdmin">
-            <label class="block text-xs text-gray-500 mb-1">所屬公司</label>
-            <select v-model="userForm.companyId" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary bg-white">
+            <label class="form-label extra-small text-muted">所屬公司</label>
+            <select v-model="userForm.companyId" class="form-select form-select-sm select-custom">
               <option value="">— 無（平台管理員）</option>
               <option v-for="c in companies" :key="c.id" :value="c.id">{{ c.name }}</option>
             </select>
           </div>
         </div>
-        <div class="flex gap-3 pt-1">
-          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50" @click="showUserForm = false">取消</button>
-          <button class="flex-1 h-11 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90" @click="handleSaveUser">儲存</button>
+        <div class="d-flex gap-3 pt-1">
+          <button class="flex-grow-1 btn-outline-dialog" @click="showUserForm = false">取消</button>
+          <button class="flex-grow-1 btn-primary-dialog" @click="handleSaveUser">儲存</button>
         </div>
       </div>
     </van-popup>
 
     <!-- Company Form Dialog -->
     <van-popup v-model:show="showCompanyForm" round position="center" :duration="0" :style="{ width: '400px' }">
-      <div class="px-6 pt-6 pb-5 flex flex-col gap-4">
-        <h2 class="text-base font-bold text-gray-800">{{ editingCompany ? '編輯公司' : '新增公司' }}</h2>
-        <div class="space-y-3">
+      <div class="dialog-content px-4 pt-4 pb-4 d-flex flex-column gap-3">
+        <h2 class="fs-6 fw-bold text-primary">{{ editingCompany ? '編輯公司' : '新增公司' }}</h2>
+        <div class="d-flex flex-column gap-3">
           <div>
-            <label class="block text-xs text-gray-500 mb-1">公司名稱</label>
-            <input v-model="companyForm.name" type="text" class="w-full h-10 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary" />
+            <label class="form-label extra-small text-muted">公司名稱</label>
+            <input v-model="companyForm.name" type="text" class="form-control form-control-sm input-custom" />
           </div>
-          <div v-if="editingCompany" class="flex items-center justify-between">
-            <span class="text-sm text-gray-700">啟用狀態</span>
+          <div v-if="editingCompany" class="d-flex align-items-center justify-content-between">
+            <span class="small text-primary">啟用狀態</span>
             <van-switch v-model="companyForm.isActive" size="22" />
           </div>
         </div>
-        <div class="flex gap-3 pt-1">
-          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50" @click="showCompanyForm = false">取消</button>
-          <button class="flex-1 h-11 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90" :disabled="!companyForm.name.trim()" @click="handleSaveCompany">儲存</button>
+        <div class="d-flex gap-3 pt-1">
+          <button class="flex-grow-1 btn-outline-dialog" @click="showCompanyForm = false">取消</button>
+          <button class="flex-grow-1 btn-primary-dialog" :disabled="!companyForm.name.trim()" @click="handleSaveCompany">儲存</button>
         </div>
       </div>
     </van-popup>
@@ -849,7 +823,7 @@ async function handleConfirmImport() {
       ref="fileInputRef"
       type="file"
       accept=".xlsx,.xls,.csv"
-      class="hidden"
+      class="d-none"
       @change="handleFileChange"
     />
 
@@ -861,38 +835,35 @@ async function handleConfirmImport() {
       :duration="0"
       :style="{ width: '540px', maxHeight: '80vh' }"
     >
-      <div class="px-6 pt-6 pb-5 flex flex-col gap-4">
-        <h2 class="text-base font-bold text-gray-800">匯入商品（{{ importRows.length }} 筆）</h2>
+      <div class="dialog-content px-4 pt-4 pb-4 d-flex flex-column gap-3">
+        <h2 class="fs-6 fw-bold text-primary">匯入商品（{{ importRows.length }} 筆）</h2>
 
         <div>
-          <div class="text-sm text-gray-500 mb-2">匯入至分類</div>
-          <div class="flex flex-wrap gap-2">
+          <div class="small text-muted mb-2">匯入至分類</div>
+          <div class="d-flex flex-wrap gap-2">
             <button
               v-for="cat in categories"
               :key="cat.id"
-              class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
-              :class="importCategoryId === cat.id ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-800 hover:border-gray-300'"
+              class="cat-chip"
+              :class="importCategoryId === cat.id ? 'cat-chip--active' : ''"
               @click="importCategoryId = cat.id"
             >{{ cat.name }}</button>
           </div>
         </div>
 
-        <div class="max-h-64 overflow-auto rounded-xl border border-gray-200 divide-y divide-gray-100 text-sm">
-          <div v-for="(row, i) in importRows" :key="i" class="flex items-center gap-2 px-3 py-2">
-            <span class="flex-1 font-medium text-gray-800 truncate">{{ row.name }}</span>
-            <span v-if="row.barcode" class="text-xs text-gray-400 font-mono shrink-0">{{ row.barcode }}</span>
-            <span class="text-gray-600 shrink-0">NT${{ row.price }}</span>
-            <span class="text-gray-400 shrink-0 w-10 text-right">{{ row.stock === null ? '不限' : row.stock }}</span>
+        <div class="import-preview overflow-auto rounded border">
+          <div v-for="(row, i) in importRows" :key="i" class="d-flex align-items-center gap-2 px-3 py-2" :class="{ 'border-top': i > 0 }">
+            <span class="flex-grow-1 fw-medium text-primary text-truncate small">{{ row.name }}</span>
+            <span v-if="row.barcode" class="extra-small text-muted font-monospace flex-shrink-0">{{ row.barcode }}</span>
+            <span class="text-primary flex-shrink-0 small">NT${{ row.price }}</span>
+            <span class="text-muted flex-shrink-0 small" style="width: 40px; text-align: right;">{{ row.stock === null ? '不限' : row.stock }}</span>
           </div>
         </div>
 
-        <div class="flex gap-3">
+        <div class="d-flex gap-3">
+          <button class="flex-grow-1 btn-outline-dialog" @click="showImportDialog = false">取消</button>
           <button
-            class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
-            @click="showImportDialog = false"
-          >取消</button>
-          <button
-            class="flex-1 h-11 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-40"
+            class="flex-grow-1 btn-primary-dialog"
             :disabled="!importCategoryId || importLoading"
             @click="handleConfirmImport"
           >{{ importLoading ? '匯入中...' : '確認匯入' }}</button>
@@ -901,3 +872,301 @@ async function handleConfirmImport() {
     </van-popup>
   </div>
 </template>
+
+<style scoped>
+.admin-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.h-100 { height: 100%; }
+.bg-surface { background-color: var(--c-surface); }
+.bg-white { background-color: #fff; }
+.text-primary { color: var(--c-text) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.rounded { border-radius: var(--radius) !important; }
+.border { border: 1px solid var(--c-border) !important; }
+.border-bottom { border-bottom: 1px solid var(--c-surface) !important; }
+.border-top { border-top: 1px solid var(--c-surface) !important; }
+.extra-small { font-size: 0.75rem; }
+.opacity-50 { opacity: 0.5; }
+.opacity-25 { opacity: 0.25; }
+.num { font-variant-numeric: tabular-nums; }
+.fw-medium { font-weight: 500; }
+
+/* Tab group */
+.tab-group {
+  background-color: var(--c-surface);
+  border-radius: var(--radius-sm);
+}
+.tab-btn {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  min-height: 44px;
+}
+.tab-btn--active {
+  background-color: #fff;
+  color: var(--c-text);
+}
+
+/* Selects & Inputs */
+.select-custom {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+  background-color: #fff;
+  min-width: 160px;
+}
+.select-custom:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
+.input-custom {
+  height: 40px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+}
+.input-custom:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c-text-muted);
+  z-index: 1;
+}
+.search-input {
+  padding-left: 32px;
+  padding-right: 12px;
+  height: 36px;
+  min-height: 44px;
+  width: 240px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
+/* Buttons */
+.btn-primary {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--c-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+}
+
+.btn-outline {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--c-text);
+  cursor: pointer;
+}
+.btn-outline:active {
+  background-color: var(--c-surface);
+}
+
+.btn-danger-outline {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #fecaca;
+  background: transparent;
+  font-size: 0.75rem;
+  color: #dc3545;
+  cursor: pointer;
+}
+.btn-danger-outline:active {
+  background-color: #fff5f5;
+}
+
+.btn-sm {
+  height: 28px;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+/* Table */
+.admin-table {
+  font-size: 0.875rem;
+}
+.admin-table thead tr {
+  background-color: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+}
+.admin-table thead th {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.admin-table tbody td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+.admin-table tbody tr + tr {
+  border-top: 1px solid var(--c-surface);
+}
+
+/* Stock edit */
+.stock-input {
+  width: 80px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-primary);
+  text-align: center;
+  font-size: 0.875rem;
+}
+.stock-input:focus {
+  outline: none;
+}
+.btn-stock-edit {
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--c-text);
+  cursor: pointer;
+  min-width: 48px;
+  min-height: 44px;
+}
+.btn-stock-edit:active {
+  background-color: var(--c-surface);
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+.status-active {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+.status-inactive {
+  background-color: var(--c-surface);
+  color: var(--c-text-muted);
+}
+
+/* Role badges */
+.badge-role {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-super { background-color: #f3e8ff; color: #7c3aed; }
+.badge-admin { background-color: #dbeafe; color: #2563eb; }
+.badge-cashier { background-color: var(--c-surface); color: var(--c-text-muted); }
+
+/* Dialog */
+.dialog-content {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.btn-outline-dialog {
+  height: 44px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--c-text);
+  cursor: pointer;
+}
+.btn-outline-dialog:active {
+  background-color: var(--c-surface);
+}
+.btn-primary-dialog {
+  height: 44px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: none;
+  background-color: var(--c-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-primary-dialog:disabled {
+  opacity: 0.4;
+}
+
+/* Import chips */
+.cat-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--c-text);
+  cursor: pointer;
+  min-height: 44px;
+}
+.cat-chip--active {
+  border-color: var(--c-primary);
+  background-color: #fef2f2;
+  color: var(--c-primary);
+}
+
+.import-preview {
+  max-height: 256px;
+}
+</style>

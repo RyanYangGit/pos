@@ -40,14 +40,14 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="h-full flex items-center justify-center bg-surface px-6">
-    <div class="w-full max-w-sm">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">{{ LOCALE.appName }}</h1>
-        <p class="text-gray-500 mt-1">{{ LOCALE.loginTitle }}</p>
+  <div class="login-page d-flex align-items-center justify-content-center bg-surface px-4 h-100">
+    <div class="w-100" style="max-width: 360px;">
+      <div class="text-center mb-5">
+        <h1 class="fs-4 fw-bold text-primary">{{ LOCALE.appName }}</h1>
+        <p class="text-muted mt-1">{{ LOCALE.loginTitle }}</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <form @submit.prevent="handleLogin" class="d-flex flex-column gap-3">
         <van-field
           v-model="username"
           :label="LOCALE.username"
@@ -77,3 +77,20 @@ async function handleLogin() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.login-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.bg-surface { background-color: var(--c-surface); }
+.text-primary { color: var(--c-text) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.h-100 { height: 100%; }
+</style>

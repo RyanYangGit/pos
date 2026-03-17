@@ -1,34 +1,44 @@
-@import "tailwindcss";
+/* Bootstrap core */
+@import "bootstrap/dist/css/bootstrap.min.css";
 
-@theme {
-  --color-primary: #1a1a2e;
-  --color-primary-light: #16213e;
-  --color-accent: #e94560;
-  --color-accent-light: #ff6b81;
-  --color-surface: #f8f9fa;
-  --color-surface-dark: #e9ecef;
-  --color-success: #07c160;
-  --color-warning: #ff976a;
-}
-
-/* iOS PWA safe area */
+/* ── Design Tokens ── */
 :root {
+  --c-primary: #1a1a2e;
+  --c-primary-light: #16213e;
+  --c-accent: #e94560;
+  --c-accent-hover: #d63b54;
+  --c-surface: #f5f6f8;
+  --c-surface-dark: #e9ecef;
+  --c-white: #ffffff;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --c-text-light: #adb5bd;
+  --c-success: #07c160;
+  --c-warning: #ff976a;
+  --c-danger: #dc3545;
+  --c-border: #dee2e6;
+
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-full: 50px;
 }
 
-* {
+/* ── Global Reset ── */
+*, *::before, *::after {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: none !important;
   animation: none !important;
 }
 
-*::before, *::after {
-  transition: none !important;
-  animation: none !important;
+/* Override Vant button color reset */
+button:not(.van-button) {
+  color: inherit !important;
 }
 
 html, body {
@@ -37,6 +47,8 @@ html, body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--c-text);
+  background: var(--c-surface);
 }
 
 body {
@@ -44,25 +56,110 @@ body {
   padding-bottom: var(--sab);
   padding-left: var(--sal);
   padding-right: var(--sar);
-  background-color: var(--color-surface);
 }
 
-/* Prevent pull-to-refresh in PWA */
 html {
   overflow: hidden;
   height: 100%;
 }
-
 body {
   overflow: auto;
   height: 100%;
 }
-
 #app {
   height: 100%;
 }
 
-/* Override Vant's button reset that forces color to --van-text-color (#323233) */
-button:not(.van-button) {
-  color: inherit !important;
+/* ── Utility Classes (replacing Tailwind) ── */
+.bg-primary { background: var(--c-primary) !important; }
+.bg-primary-light { background: var(--c-primary-light) !important; }
+.bg-accent { background: var(--c-accent) !important; }
+.bg-surface { background: var(--c-surface) !important; }
+.bg-white { background: var(--c-white) !important; }
+
+.text-white { color: #fff !important; }
+.text-primary { color: var(--c-primary) !important; }
+.text-accent { color: var(--c-accent) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.text-light { color: var(--c-text-light) !important; }
+
+/* ── POS Buttons ── */
+.btn-primary {
+  background: var(--c-primary) !important;
+  border-color: var(--c-primary) !important;
+  color: #fff !important;
+  font-weight: 600;
 }
+.btn-primary:active {
+  background: var(--c-primary-light) !important;
+}
+
+.btn-accent {
+  background: var(--c-accent) !important;
+  border-color: var(--c-accent) !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.btn-accent:active {
+  background: var(--c-accent-hover) !important;
+}
+
+.btn-outline {
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  color: var(--c-text) !important;
+  font-weight: 500;
+}
+.btn-outline:active {
+  background: var(--c-surface);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: inherit !important;
+  padding: 0;
+}
+
+.btn-danger-outline {
+  background: var(--c-white);
+  border: 1.5px solid #f5c2c7;
+  color: var(--c-danger) !important;
+  font-weight: 500;
+}
+
+/* Touch-friendly sizing */
+.btn { min-height: 44px; border-radius: var(--radius); }
+.btn-sm { min-height: 34px; border-radius: var(--radius-sm); font-size: 0.8125rem; }
+.btn-lg { min-height: 56px; border-radius: var(--radius); font-size: 1.125rem; }
+
+/* ── Cards ── */
+.card {
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-white);
+  box-shadow: none !important;
+}
+
+/* ── Scrollbar Hide ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Badge ── */
+.badge-role {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-super { background: #e8d5f5; color: #6f42c1; }
+.badge-admin { background: #d0e4ff; color: #0d6efd; }
+.badge-cashier { background: #e9ecef; color: #495057; }
+
+/* ── Status ── */
+.status-active { background: #d4edda; color: #155724; }
+.status-inactive { background: #e9ecef; color: #6c757d; }
+
+/* ── Tabular numbers for prices ── */
+.num { font-variant-numeric: tabular-nums; }

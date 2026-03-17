@@ -86,30 +86,30 @@ function handleCameraScanned(code: string) {
 
 <template>
   <!-- iPhone Layout -->
-  <div class="flex flex-col h-full md:hidden">
+  <div class="pos-mobile d-flex flex-column h-100 d-md-none">
     <!-- Barcode input bar -->
-    <div class="px-3 pt-3 pb-1">
-      <div class="flex gap-2">
-        <div class="flex-1 relative">
+    <div class="p-3 pb-1">
+      <div class="d-flex gap-2">
+        <div class="flex-grow-1 position-relative">
           <input
             ref="barcodeInputRef"
             v-model="barcodeInput"
             type="text"
             inputmode="none"
             :placeholder="LOCALE.barcodePlaceholder"
-            class="w-full h-11 px-4 pr-10 rounded-xl border border-gray-300 text-sm focus:border-primary focus:outline-none"
+            class="form-control barcode-input"
             @keydown.enter="handleBarcodeSubmit"
           />
           <button
             v-if="barcodeInput"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            class="btn btn-link barcode-clear-btn"
             @click="barcodeInput = ''; barcodeInputRef?.focus()"
           >
             <van-icon name="clear" size="16" />
           </button>
         </div>
         <button
-          class="shrink-0 h-11 px-3 rounded-xl bg-primary text-white text-sm font-medium flex items-center gap-1 active:scale-95"
+          class="btn btn-primary d-flex align-items-center gap-1 flex-shrink-0 scan-btn"
           @click="showCameraScanner = true"
         >
           <van-icon name="scan" size="18" />
@@ -123,21 +123,21 @@ function handleCameraScanned(code: string) {
       @select="activeCategoryId = $event"
     />
 
-    <div class="flex-1 overflow-auto">
+    <div class="flex-grow-1 overflow-auto">
       <ProductGrid :products="filteredProducts" @select="handleProductTap" />
     </div>
 
     <!-- Bottom cart summary bar (iPhone) -->
     <div
       v-if="totalItems > 0"
-      class="flex items-center justify-between px-4 py-3 bg-primary text-white cursor-pointer active:bg-primary-light"
+      class="d-flex align-items-center justify-content-between px-3 py-3 bg-primary text-white cart-summary-bar"
       @click="showCartSheet = true"
     >
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-medium">{{ totalItems }}{{ LOCALE.items }}</span>
-        <span class="text-base font-bold">{{ LOCALE.total }} {{ formatCurrency(totalAmount) }}</span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="small fw-medium">{{ totalItems }}{{ LOCALE.items }}</span>
+        <span class="fw-bold">{{ LOCALE.total }} {{ formatCurrency(totalAmount) }}</span>
       </div>
-      <span class="text-sm opacity-80">{{ LOCALE.viewCart }} ▲</span>
+      <span class="small opacity-75">{{ LOCALE.viewCart }} &#9650;</span>
     </div>
 
     <!-- iPhone cart bottom sheet -->
@@ -162,31 +162,31 @@ function handleCameraScanned(code: string) {
   </div>
 
   <!-- iPad Layout -->
-  <div class="hidden md:flex h-full">
+  <div class="pos-desktop d-none d-md-flex h-100">
     <!-- Left: Products area -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-grow-1 d-flex flex-column overflow-hidden">
       <!-- Barcode input bar -->
-      <div class="px-3 pt-3 pb-1">
-        <div class="flex gap-2">
-          <div class="flex-1 relative">
+      <div class="p-3 pb-1">
+        <div class="d-flex gap-2">
+          <div class="flex-grow-1 position-relative">
             <input
               v-model="barcodeInput"
               type="text"
               inputmode="none"
               :placeholder="LOCALE.barcodePlaceholder"
-              class="w-full h-11 px-4 pr-10 rounded-xl border border-gray-300 text-sm focus:border-primary focus:outline-none"
+              class="form-control barcode-input"
               @keydown.enter="handleBarcodeSubmit"
             />
             <button
               v-if="barcodeInput"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              class="btn btn-link barcode-clear-btn"
               @click="barcodeInput = ''"
             >
               <van-icon name="clear" size="16" />
             </button>
           </div>
           <button
-            class="shrink-0 h-11 px-3 rounded-xl bg-primary text-white text-sm font-bold flex items-center gap-1 active:scale-95"
+            class="btn btn-primary d-flex align-items-center gap-1 flex-shrink-0 scan-btn fw-bold"
             @click="showCameraScanner = true"
           >
             <van-icon name="scan" size="18" />
@@ -200,13 +200,13 @@ function handleCameraScanned(code: string) {
         :active-id="activeCategoryId"
         @select="activeCategoryId = $event"
       />
-      <div class="flex-1 overflow-auto">
+      <div class="flex-grow-1 overflow-auto">
         <ProductGrid :products="filteredProducts" @select="handleProductTap" />
       </div>
     </div>
 
     <!-- Right: Cart sidebar (always visible on iPad) -->
-    <div class="w-80 border-l border-gray-200 bg-white flex flex-col">
+    <div class="cart-sidebar d-flex flex-column bg-white border-start">
       <CartPanel
         :items="items"
         :total-items="totalItems"
@@ -227,3 +227,53 @@ function handleCameraScanned(code: string) {
   />
 </template>
 
+<style scoped>
+.barcode-input {
+  height: 44px;
+  padding-left: 1rem;
+  padding-right: 2.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+}
+.barcode-input:focus {
+  border-color: var(--c-primary);
+  outline: none;
+  box-shadow: none;
+}
+.barcode-clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c-text-muted);
+  padding: 0;
+  text-decoration: none;
+}
+.scan-btn {
+  height: 44px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  border-radius: var(--radius);
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #fff;
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+.scan-btn:hover,
+.scan-btn:active {
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #fff;
+}
+.cart-summary-bar {
+  background-color: var(--c-primary);
+  cursor: pointer;
+  min-height: 44px;
+}
+.cart-sidebar {
+  width: 320px;
+  border-color: var(--c-border);
+}
+</style>

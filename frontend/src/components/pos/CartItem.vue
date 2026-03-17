@@ -14,28 +14,68 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
-    <div class="flex-1 min-w-0">
-      <div class="text-sm font-medium text-gray-800 truncate">{{ item.productName }}</div>
-      <div class="text-xs text-gray-400 mt-0.5">{{ formatCurrency(item.unitPrice) }}</div>
+  <div class="d-flex align-items-center gap-3 py-3 border-bottom cart-item-row">
+    <div class="flex-grow-1 min-width-0">
+      <div class="fw-medium small text-truncate item-name">{{ item.productName }}</div>
+      <div class="item-unit-price mt-1">{{ formatCurrency(item.unitPrice) }}</div>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="d-flex align-items-center gap-2">
       <button
-        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg font-bold active:scale-90 active:bg-gray-200"
+        class="btn qty-btn d-flex align-items-center justify-content-center fw-bold"
         @click="item.quantity > 1 ? emit('decrement', item.productId) : emit('remove', item.productId)"
       >
         {{ item.quantity > 1 ? '−' : '✕' }}
       </button>
-      <span class="w-8 text-center text-sm font-medium">{{ item.quantity }}</span>
+      <span class="text-center small fw-medium qty-display">{{ item.quantity }}</span>
       <button
-        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg font-bold active:scale-90 active:bg-gray-200"
+        class="btn qty-btn d-flex align-items-center justify-content-center fw-bold"
         @click="emit('increment', item.productId)"
       >
         +
       </button>
     </div>
-    <div class="w-20 text-right text-sm font-bold text-gray-800">
+    <div class="fw-bold small text-end item-subtotal">
       {{ formatCurrency(item.subtotal) }}
     </div>
   </div>
 </template>
+
+<style scoped>
+.cart-item-row {
+  border-color: var(--c-surface) !important;
+}
+.cart-item-row:last-child {
+  border-bottom: none !important;
+}
+.min-width-0 {
+  min-width: 0;
+}
+.item-name {
+  color: var(--c-text);
+}
+.item-unit-price {
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+}
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--c-surface);
+  font-size: 1.125rem;
+  padding: 0;
+  min-height: 32px;
+  color: var(--c-text);
+}
+.qty-btn:hover,
+.qty-btn:active {
+  background-color: var(--c-border);
+}
+.qty-display {
+  width: 32px;
+}
+.item-subtotal {
+  width: 80px;
+  color: var(--c-text);
+}
+</style>

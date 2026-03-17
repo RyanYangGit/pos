@@ -89,14 +89,28 @@ function handleClose() {
     :style="{ height: '60%' }"
     @update:show="handleClose"
   >
-    <div class="px-4 pt-8 pb-4 flex flex-col h-full">
-      <h2 class="text-lg font-bold text-center mb-4">{{ LOCALE.openCamera }}</h2>
+    <div class="d-flex flex-column h-100 px-3 pt-5 pb-3">
+      <h2 class="fw-bold text-center mb-3 scanner-title">{{ LOCALE.openCamera }}</h2>
 
-      <div class="flex-1 flex items-center justify-center overflow-hidden rounded-xl bg-black">
-        <div :id="readerId" class="w-full h-full" />
+      <div class="flex-grow-1 d-flex align-items-center justify-content-center overflow-hidden rounded scanner-viewport">
+        <div :id="readerId" class="w-100 h-100" />
       </div>
 
-      <p v-if="error" class="text-red-500 text-sm text-center mt-3">{{ error }}</p>
+      <p v-if="error" class="text-center small mt-3 error-text">{{ error }}</p>
     </div>
   </van-popup>
 </template>
+
+<style scoped>
+.scanner-title {
+  font-size: 1.125rem;
+  color: var(--c-text);
+}
+.scanner-viewport {
+  background-color: #000;
+  border-radius: var(--radius);
+}
+.error-text {
+  color: #dc3545;
+}
+</style>

@@ -98,34 +98,34 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="h-full flex flex-col items-center justify-center bg-surface px-6">
-    <div class="w-full max-w-xs text-center">
-      <h1 class="text-xl font-bold text-gray-800 mb-1">{{ title }}</h1>
-      <p class="text-gray-500 text-sm mb-8">{{ subtitle }}</p>
+  <div class="pin-page d-flex flex-column align-items-center justify-content-center bg-surface px-4 h-100">
+    <div class="w-100 text-center" style="max-width: 300px;">
+      <h1 class="fs-5 fw-bold text-primary mb-1">{{ title }}</h1>
+      <p class="text-muted small mb-5">{{ subtitle }}</p>
 
       <!-- PIN dots -->
-      <div class="flex justify-center gap-4 mb-10">
+      <div class="d-flex justify-content-center gap-3 mb-5">
         <div
           v-for="(filled, i) in dots"
           :key="i"
-          class="w-4 h-4 rounded-full border-2 transition-colors"
-          :class="filled ? 'bg-primary border-primary' : 'border-gray-300'"
+          class="pin-dot"
+          :class="filled ? 'pin-dot--filled' : ''"
         />
       </div>
 
       <!-- Number pad -->
-      <div class="grid grid-cols-3 gap-3 max-w-[240px] mx-auto">
+      <div class="numpad mx-auto">
         <template v-for="row in keys" :key="row.join()">
           <button
             v-for="key in row"
             :key="key"
-            class="h-14 rounded-xl text-xl font-medium transition-colors"
+            class="numpad-key"
             :class="
               key === ''
                 ? 'invisible'
                 : key === 'del'
-                  ? 'text-gray-500 active:bg-gray-100'
-                  : 'bg-white text-gray-800 active:bg-gray-100'
+                  ? 'numpad-key--del'
+                  : 'numpad-key--num'
             "
             :disabled="key === '' || loading"
             @click="key === 'del' ? onDelete() : onInput(key)"
@@ -139,9 +139,9 @@ async function handleLogout() {
       </div>
 
       <!-- Unlock mode: option to switch to login -->
-      <div v-if="mode === 'unlock'" class="mt-8">
+      <div v-if="mode === 'unlock'" class="mt-5">
         <button
-          class="text-sm text-gray-400 underline"
+          class="btn-ghost small text-decoration-underline"
           @click="handleLogout"
         >
           {{ LOCALE.logout }}
@@ -150,3 +150,72 @@ async function handleLogout() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.pin-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.bg-surface { background-color: var(--c-surface); }
+.text-primary { color: var(--c-text) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.h-100 { height: 100%; }
+
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--c-border);
+  background: transparent;
+}
+.pin-dot--filled {
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  max-width: 240px;
+}
+.numpad-key {
+  height: 56px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.25rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.numpad-key--num {
+  background-color: #fff;
+  color: var(--c-text);
+}
+.numpad-key--num:active {
+  background-color: #f0f0f0;
+}
+.numpad-key--del {
+  background: transparent;
+  color: var(--c-text-muted);
+}
+.numpad-key--del:active {
+  background-color: #f0f0f0;
+}
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  padding: 8px 12px;
+  min-height: 44px;
+}
+</style>

@@ -7,10 +7,34 @@ const { isOnline } = useNetworkStatus()
 
 <template>
   <div
-    class="flex items-center gap-1.5 px-3 py-1 text-xs font-medium"
-    :class="isOnline ? 'bg-success text-white' : 'bg-warning text-white'"
+    class="d-flex align-items-center gap-1 px-3 py-1 small fw-medium text-white"
+    :class="isOnline ? 'banner-online' : 'banner-offline'"
   >
-    <span class="inline-block w-2 h-2 rounded-full" :class="isOnline ? 'bg-green-200' : 'bg-orange-200'" />
+    <span class="status-dot rounded-circle" :class="isOnline ? 'dot-online' : 'dot-offline'" />
     {{ isOnline ? LOCALE.online : LOCALE.offline }}
   </div>
 </template>
+
+<style scoped>
+.banner-online {
+  background-color: var(--c-success, #22c55e);
+}
+
+.banner-offline {
+  background-color: var(--c-warning, #f59e0b);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.dot-online {
+  background-color: #bbf7d0;
+}
+
+.dot-offline {
+  background-color: #fed7aa;
+}
+</style>

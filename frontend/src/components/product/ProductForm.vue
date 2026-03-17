@@ -101,10 +101,10 @@ function handleClose() {
     :style="{ height: '85%' }"
     @update:show="handleClose"
   >
-    <div class="px-4 pt-8 pb-4 flex flex-col h-full">
-      <h2 class="text-lg font-bold text-center mb-4">{{ title }}</h2>
+    <div class="product-form px-3 pt-5 pb-3 d-flex flex-column h-100">
+      <h2 class="fs-5 fw-bold text-center mb-4">{{ title }}</h2>
 
-      <div class="flex-1 overflow-auto space-y-4">
+      <div class="flex-grow-1 overflow-auto d-flex flex-column gap-3">
         <van-field
           v-model="name"
           :label="LOCALE.productName"
@@ -117,7 +117,7 @@ function handleClose() {
           required
         >
           <template #input>
-            <select v-model="categoryId" class="w-full bg-transparent outline-none text-sm">
+            <select v-model="categoryId" class="w-100 bg-transparent border-0 outline-none small">
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                 {{ cat.name }}
               </option>
@@ -156,9 +156,9 @@ function handleClose() {
         </van-cell>
       </div>
 
-      <div class="pt-4 flex flex-col gap-2">
+      <div class="pt-3 d-flex flex-column gap-2">
         <button
-          class="w-full h-14 rounded-xl bg-accent text-white text-base font-bold active:scale-[0.98] transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+          class="btn-accent w-100"
           :disabled="!name.trim() || !price"
           @click="handleSave"
         >
@@ -166,7 +166,7 @@ function handleClose() {
         </button>
         <button
           v-if="isEditing"
-          class="w-full h-11 rounded-xl border border-red-300 text-red-500 text-sm font-medium active:bg-red-50"
+          class="btn-danger-outline w-100"
           @click="emit('delete')"
         >
           刪除商品
@@ -185,3 +185,49 @@ function handleClose() {
     />
   </van-popup>
 </template>
+
+<style scoped>
+.product-form {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.h-100 { height: 100%; }
+.outline-none { outline: none; }
+
+.btn-accent {
+  height: 56px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  background-color: var(--c-accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+.btn-accent:disabled {
+  background-color: var(--c-border);
+  cursor: not-allowed;
+}
+
+.btn-danger-outline {
+  height: 44px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-danger-outline:active {
+  background-color: #fff5f5;
+}
+</style>

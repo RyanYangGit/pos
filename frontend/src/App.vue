@@ -14,7 +14,7 @@ onMounted(() => {
 
 <template>
   <!-- Loading -->
-  <div v-if="authScreen === 'loading'" class="h-full flex items-center justify-center">
+  <div v-if="authScreen === 'loading'" class="h-100 d-flex align-items-center justify-content-center">
     <van-loading size="36" />
   </div>
 

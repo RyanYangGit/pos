@@ -169,19 +169,19 @@ async function handleDeleteCategory(id: string) {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-surface">
+  <div class="products-page d-flex flex-column bg-surface h-100">
     <van-tabs v-model:active="activeTab" sticky>
       <van-tab :title="LOCALE.tabProducts">
         <div class="p-3">
-          <div class="flex gap-2 mb-3">
+          <div class="d-flex gap-2 mb-3">
             <button
-              class="flex-1 h-12 rounded-xl border-2 border-dashed border-gray-300 text-gray-800 text-sm font-medium active:bg-gray-50"
+              class="flex-grow-1 btn-add-dashed"
               @click="handleAddProduct"
             >
               + {{ LOCALE.addProduct }}
             </button>
             <button
-              class="shrink-0 h-12 px-4 rounded-xl border-2 border-dashed border-green-400 text-green-600 text-sm font-medium active:bg-green-50 flex items-center gap-1"
+              class="flex-shrink-0 btn-import-dashed d-flex align-items-center gap-1"
               @click="triggerImport"
             >
               <van-icon name="down" size="16" />
@@ -199,15 +199,15 @@ async function handleDeleteCategory(id: string) {
       </van-tab>
 
       <van-tab :title="LOCALE.categoryManage">
-        <div class="p-3 space-y-3">
-          <div class="flex gap-2">
+        <div class="p-3 d-flex flex-column gap-3">
+          <div class="d-flex gap-2">
             <van-field
               v-model="newCategoryName"
               :placeholder="LOCALE.categoryName"
-              class="flex-1 rounded-lg"
+              class="flex-grow-1 rounded"
             />
             <button
-              class="shrink-0 px-4 h-11 bg-accent text-white rounded-lg text-sm font-medium active:scale-95 disabled:bg-gray-300"
+              class="flex-shrink-0 btn-accent"
               :disabled="!newCategoryName.trim()"
               @click="handleAddCategory"
             >
@@ -215,10 +215,10 @@ async function handleDeleteCategory(id: string) {
             </button>
           </div>
 
-          <div v-for="cat in categories" :key="cat.id" class="flex items-center px-4 py-3 bg-white rounded-lg">
-            <span class="flex-1 text-sm font-medium text-gray-800">{{ cat.name }}</span>
+          <div v-for="cat in categories" :key="cat.id" class="d-flex align-items-center px-3 py-3 bg-white rounded">
+            <span class="flex-grow-1 small fw-medium text-primary">{{ cat.name }}</span>
             <button
-              class="text-red-400 hover:text-red-600 p-1"
+              class="btn-icon-delete"
               @click="handleDeleteCategory(cat.id)"
             >
               <van-icon name="delete-o" size="18" />
@@ -241,7 +241,7 @@ async function handleDeleteCategory(id: string) {
       ref="fileInputRef"
       type="file"
       accept=".xlsx,.xls,.csv"
-      class="hidden"
+      class="d-none"
       @change="handleFileChange"
     />
 
@@ -253,20 +253,18 @@ async function handleDeleteCategory(id: string) {
       :duration="0"
       :style="{ maxHeight: '80%' }"
     >
-      <div class="px-4 pt-5 pb-6 flex flex-col gap-4">
-        <h2 class="text-base font-bold text-gray-800">匯入商品 ({{ importRows.length }} 筆)</h2>
+      <div class="import-dialog px-3 pt-4 pb-4 d-flex flex-column gap-3">
+        <h2 class="fs-6 fw-bold text-primary">匯入商品 ({{ importRows.length }} 筆)</h2>
 
         <!-- Category selector -->
         <div>
-          <div class="text-sm text-gray-500 mb-1.5">新增商品的分類</div>
-          <div class="flex flex-wrap gap-2">
+          <div class="small text-muted mb-2">新增商品的分類</div>
+          <div class="d-flex flex-wrap gap-2">
             <button
               v-for="cat in categories"
               :key="cat.id"
-              class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
-              :class="importCategoryId === cat.id
-                ? 'border-accent bg-red-50 text-accent'
-                : 'border-gray-200 text-gray-800'"
+              class="cat-chip"
+              :class="importCategoryId === cat.id ? 'cat-chip--active' : ''"
               @click="importCategoryId = cat.id"
             >
               {{ cat.name }}
@@ -275,34 +273,35 @@ async function handleDeleteCategory(id: string) {
         </div>
 
         <!-- Preview list -->
-        <div class="max-h-60 overflow-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div class="import-preview overflow-auto border rounded">
           <div
             v-for="(row, i) in importRows"
             :key="i"
-            class="flex items-center gap-2 px-3 py-2 text-sm"
+            class="d-flex align-items-center gap-2 px-3 py-2 small"
+            :class="{ 'border-top': i > 0 }"
           >
-            <span class="flex-1 font-medium text-gray-800 truncate">{{ row.name }}</span>
-            <span v-if="row.barcode" class="text-xs text-gray-400 font-mono shrink-0">{{ row.barcode }}</span>
-            <span class="text-gray-600 shrink-0">NT${{ row.price }}</span>
-            <span class="text-gray-400 shrink-0 w-10 text-right">
+            <span class="flex-grow-1 fw-medium text-primary text-truncate">{{ row.name }}</span>
+            <span v-if="row.barcode" class="extra-small text-muted font-monospace flex-shrink-0">{{ row.barcode }}</span>
+            <span class="text-primary flex-shrink-0">NT${{ row.price }}</span>
+            <span class="text-muted flex-shrink-0" style="width: 40px; text-align: right;">
               {{ row.stock === null ? '不限' : row.stock }}
             </span>
           </div>
         </div>
 
-        <div class="text-xs text-gray-400">
+        <div class="extra-small text-muted">
           已有相同條碼的商品會自動更新；無條碼則依品名比對
         </div>
 
-        <div class="flex gap-3">
+        <div class="d-flex gap-3">
           <button
-            class="flex-1 h-12 rounded-xl border border-gray-300 text-sm text-gray-800 active:bg-gray-50"
+            class="flex-grow-1 btn-outline-cancel"
             @click="showImportDialog = false"
           >
             取消
           </button>
           <button
-            class="flex-1 h-12 rounded-xl bg-accent text-white text-sm font-bold active:scale-[0.98] disabled:bg-gray-300"
+            class="flex-grow-1 btn-accent-import"
             :disabled="!importCategoryId || importLoading"
             @click="handleConfirmImport"
           >
@@ -313,3 +312,147 @@ async function handleDeleteCategory(id: string) {
     </van-popup>
   </div>
 </template>
+
+<style scoped>
+.products-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.h-100 { height: 100%; }
+.bg-surface { background-color: var(--c-surface); }
+.bg-white { background-color: #fff; }
+.text-primary { color: var(--c-text) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.rounded { border-radius: var(--radius-sm) !important; }
+.border { border: 1px solid var(--c-border) !important; }
+.border-top { border-top: 1px solid var(--c-surface) !important; }
+.extra-small { font-size: 0.75rem; }
+.fw-medium { font-weight: 500; }
+
+.btn-add-dashed {
+  height: 48px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: 2px dashed var(--c-border);
+  background: transparent;
+  color: var(--c-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-add-dashed:active {
+  background-color: var(--c-surface);
+}
+
+.btn-import-dashed {
+  height: 48px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius);
+  border: 2px dashed #4ade80;
+  background: transparent;
+  color: #16a34a;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-import-dashed:active {
+  background-color: #f0fdf4;
+}
+
+.btn-accent {
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--c-accent);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-accent:disabled {
+  background-color: var(--c-border);
+}
+
+.btn-icon-delete {
+  background: none;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.import-dialog {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+.import-preview {
+  max-height: 240px;
+}
+
+.cat-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--c-text);
+  cursor: pointer;
+  min-height: 44px;
+}
+.cat-chip--active {
+  border-color: var(--c-accent);
+  background-color: #fef2f2;
+  color: var(--c-accent);
+}
+
+.btn-outline-cancel {
+  height: 48px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--c-text);
+  cursor: pointer;
+}
+.btn-outline-cancel:active {
+  background-color: var(--c-surface);
+}
+
+.btn-accent-import {
+  height: 48px;
+  min-height: 44px;
+  border-radius: var(--radius);
+  border: none;
+  background-color: var(--c-accent);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-accent-import:disabled {
+  background-color: var(--c-border);
+}
+</style>

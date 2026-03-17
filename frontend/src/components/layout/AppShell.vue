@@ -6,20 +6,20 @@ import SideNav from './SideNav.vue'
 
 <template>
   <!-- iPhone layout: top banner + content + bottom tabs -->
-  <div class="h-full flex flex-col md:hidden">
+  <div class="h-100 d-flex flex-column d-md-none">
     <NetworkBanner />
-    <main class="flex-1 overflow-auto">
+    <main class="flex-grow-1 overflow-auto">
       <slot />
     </main>
     <TabBar />
   </div>
 
   <!-- iPad layout: side nav + content -->
-  <div class="h-full hidden md:flex">
+  <div class="h-100 d-none d-md-flex">
     <SideNav />
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-grow-1 d-flex flex-column overflow-hidden">
       <NetworkBanner />
-      <main class="flex-1 overflow-auto">
+      <main class="flex-grow-1 overflow-auto">
         <slot />
       </main>
     </div>

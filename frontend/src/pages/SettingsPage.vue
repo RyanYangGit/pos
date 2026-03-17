@@ -111,33 +111,33 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="h-full overflow-auto bg-gray-50">
-    <div class="max-w-2xl mx-auto px-6 py-8 space-y-6">
+  <div class="settings-page h-100 overflow-auto bg-surface">
+    <div class="container-narrow mx-auto px-4 py-4 d-flex flex-column gap-4">
 
       <!-- Account card -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <van-icon name="user-o" size="20" class="text-primary" />
+      <div class="bg-white rounded border">
+        <div class="px-4 py-3 border-bottom d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="avatar d-flex align-items-center justify-content-center">
+              <van-icon name="user-o" size="20" class="text-primary-icon" />
             </div>
             <div>
-              <div class="text-sm font-semibold text-gray-800">{{ currentUser?.displayName }}</div>
-              <div class="text-xs text-gray-400 mt-0.5">{{ currentUser?.username }}</div>
-              <div v-if="companyName" class="text-xs text-gray-400 mt-0.5">{{ companyName }}</div>
+              <div class="small fw-semibold text-primary">{{ currentUser?.displayName }}</div>
+              <div class="extra-small text-muted mt-1">{{ currentUser?.username }}</div>
+              <div v-if="companyName" class="extra-small text-muted mt-1">{{ companyName }}</div>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium"
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge-role"
               :class="{
-                'bg-purple-100 text-purple-700': currentUser?.role === 'super_admin',
-                'bg-blue-100 text-blue-700': currentUser?.role === 'admin',
-                'bg-gray-100 text-gray-600': currentUser?.role === 'cashier',
+                'badge-super': currentUser?.role === 'super_admin',
+                'badge-admin': currentUser?.role === 'admin',
+                'badge-cashier': currentUser?.role === 'cashier',
               }">
               {{ roleLabel }}
             </span>
             <button
-              class="h-9 px-4 rounded-lg border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors"
+              class="btn-danger-outline"
               @click="handleLogout"
             >
               登出
@@ -147,36 +147,37 @@ async function handleLogout() {
       </div>
 
       <!-- Shop settings -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h2 class="text-sm font-semibold text-gray-700">店舖設定</h2>
+      <div class="bg-white rounded border">
+        <div class="px-4 py-3 border-bottom">
+          <h2 class="small fw-semibold text-primary">店舖設定</h2>
         </div>
-        <div class="divide-y divide-gray-100">
-          <div class="flex items-center px-5 py-3.5 gap-4">
-            <label class="w-24 text-sm text-gray-500 shrink-0">{{ LOCALE.shopName }}</label>
+        <div>
+          <div class="d-flex align-items-center px-4 py-3 gap-3 border-bottom">
+            <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.shopName }}</label>
             <input
               v-model="shopName"
               type="text"
-              class="flex-1 h-9 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary"
+              class="form-control form-control-sm input-custom"
               @blur="saveSettings"
             />
           </div>
-          <div class="flex items-center px-5 py-3.5 gap-4">
-            <label class="w-24 text-sm text-gray-500 shrink-0">{{ LOCALE.deviceName }}</label>
+          <div class="d-flex align-items-center px-4 py-3 gap-3 border-bottom">
+            <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.deviceName }}</label>
             <input
               v-model="deviceName"
               type="text"
-              class="flex-1 h-9 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary"
+              class="form-control form-control-sm input-custom"
               @blur="saveSettings"
             />
           </div>
-          <div class="flex items-center px-5 py-3.5 gap-4">
-            <label class="w-24 text-sm text-gray-500 shrink-0">{{ LOCALE.orderPrefix }}</label>
+          <div class="d-flex align-items-center px-4 py-3 gap-3">
+            <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.orderPrefix }}</label>
             <input
               v-model="orderPrefix"
               type="text"
               placeholder="A"
-              class="w-32 h-9 px-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-primary"
+              class="form-control form-control-sm input-custom"
+              style="width: 128px;"
               @blur="saveSettings"
             />
           </div>
@@ -184,14 +185,14 @@ async function handleLogout() {
       </div>
 
       <!-- Sync -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h2 class="text-sm font-semibold text-gray-700">雲端同步</h2>
+      <div class="bg-white rounded border">
+        <div class="px-4 py-3 border-bottom">
+          <h2 class="small fw-semibold text-primary">雲端同步</h2>
         </div>
-        <div class="flex items-center justify-between px-5 py-4">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3">
           <div>
-            <div class="text-sm text-gray-800">{{ LOCALE.cloudSync }}</div>
-            <div class="text-xs text-gray-400 mt-0.5">開啟後將資料同步至伺服器</div>
+            <div class="small text-primary">{{ LOCALE.cloudSync }}</div>
+            <div class="extra-small text-muted mt-1">開啟後將資料同步至伺服器</div>
           </div>
           <van-switch
             :model-value="syncEnabled"
@@ -202,30 +203,108 @@ async function handleLogout() {
       </div>
 
       <!-- Data -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="px-5 py-3 border-b border-gray-100">
-          <h2 class="text-sm font-semibold text-gray-700">資料管理</h2>
+      <div class="bg-white rounded border">
+        <div class="px-4 py-3 border-bottom">
+          <h2 class="small fw-semibold text-primary">資料管理</h2>
         </div>
-        <div class="px-5 py-4 flex flex-wrap gap-2">
-          <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
-            @click="handleExportCsv"
-          >匯出 CSV</button>
-          <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
-            @click="handleExportJson"
-          >匯出 JSON 備份</button>
-          <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
-            @click="handleImport"
-          >匯入 JSON</button>
-          <button
-            class="h-9 px-4 rounded-lg border border-red-100 text-sm text-red-500 hover:bg-red-50"
-            @click="handleClearData"
-          >清除所有資料</button>
+        <div class="px-4 py-3 d-flex flex-wrap gap-2">
+          <button class="btn-outline" @click="handleExportCsv">匯出 CSV</button>
+          <button class="btn-outline" @click="handleExportJson">匯出 JSON 備份</button>
+          <button class="btn-outline" @click="handleImport">匯入 JSON</button>
+          <button class="btn-danger-outline" @click="handleClearData">清除所有資料</button>
         </div>
       </div>
 
     </div>
   </div>
 </template>
+
+<style scoped>
+.settings-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.h-100 { height: 100%; }
+.bg-surface { background-color: var(--c-surface); }
+.bg-white { background-color: #fff; }
+.text-primary { color: var(--c-text) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+.rounded { border-radius: var(--radius) !important; }
+.border { border: 1px solid var(--c-border) !important; }
+.border-bottom { border-bottom: 1px solid var(--c-surface) !important; }
+.extra-small { font-size: 0.75rem; }
+
+.container-narrow { max-width: 672px; }
+
+.form-label-fixed { width: 96px; }
+
+.input-custom {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+.input-custom:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--c-surface);
+}
+.text-primary-icon { color: var(--c-primary); }
+
+.badge-role {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-super { background-color: #f3e8ff; color: #7c3aed; }
+.badge-admin { background-color: #dbeafe; color: #2563eb; }
+.badge-cashier { background-color: var(--c-surface); color: var(--c-text-muted); }
+
+.btn-outline {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--c-text);
+  cursor: pointer;
+}
+.btn-outline:active {
+  background-color: var(--c-surface);
+}
+
+.btn-danger-outline {
+  height: 36px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #fecaca;
+  background: transparent;
+  font-size: 0.875rem;
+  color: #dc3545;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-danger-outline:active {
+  background-color: #fff5f5;
+}
+</style>

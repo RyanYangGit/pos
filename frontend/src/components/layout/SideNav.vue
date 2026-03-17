@@ -48,22 +48,22 @@ function handleUpdate() {
 </script>
 
 <template>
-  <nav class="w-20 bg-primary text-white flex flex-col items-center pt-4 shrink-0">
-    <div class="text-xs font-bold mb-6 opacity-80">POS</div>
+  <nav class="sidenav d-flex flex-column align-items-center pt-3 flex-shrink-0 bg-primary text-white">
+    <div class="small fw-bold mb-4 opacity-75">POS</div>
     <button
       v-for="tab in tabs"
       :key="tab.path"
-      class="w-full flex flex-col items-center gap-1 py-3 text-xs active:scale-95 active:bg-opacity-80"
-      :class="isActive(tab.path) ? 'bg-white/20' : 'hover:bg-white/10'"
+      class="sidenav-btn d-flex flex-column align-items-center gap-1 py-3 border-0 small text-white w-100"
+      :class="isActive(tab.path) ? 'active' : ''"
       @click="router.push(tab.path)"
     >
-      <span class="text-xl">{{ tab.emoji }}</span>
+      <span class="fs-5">{{ tab.emoji }}</span>
       <span>{{ tab.label }}</span>
     </button>
 
-    <div class="mt-auto mb-4 relative">
+    <div class="mt-auto mb-3 position-relative">
       <button
-        class="w-full flex flex-col items-center gap-1 py-3 text-xs hover:bg-white/10"
+        class="sidenav-btn d-flex flex-column align-items-center gap-1 py-3 border-0 small text-white w-100"
         @click="showMenu = !showMenu"
       >
         <van-icon name="setting-o" size="20" />
@@ -73,24 +73,24 @@ function handleUpdate() {
       <!-- Popup menu -->
       <div
         v-if="showMenu"
-        class="absolute bottom-full left-full ml-1 mb-1 w-40 bg-primary-light rounded-xl border border-white/20 overflow-hidden z-50"
+        class="popup-menu position-absolute rounded-3 overflow-hidden"
       >
         <button
-          class="w-full px-4 py-3 text-sm text-white font-medium text-left flex items-center gap-2"
+          class="menu-item d-flex align-items-center gap-2 w-100 px-3 py-3 border-0 small fw-medium text-start text-white"
           @click="handleLock"
         >
           <van-icon name="lock" size="16" />
           鎖定螢幕
         </button>
         <button
-          class="w-full px-4 py-3 text-sm text-white font-medium text-left flex items-center gap-2 border-t border-white/10"
+          class="menu-item d-flex align-items-center gap-2 w-100 px-3 py-3 border-0 small fw-medium text-start text-white border-top border-white border-opacity-10"
           @click="handleUpdate"
         >
           <van-icon name="replay" size="16" />
           檢查更新
         </button>
         <button
-          class="w-full px-4 py-3 text-sm text-red-300 font-medium text-left flex items-center gap-2 border-t border-white/10"
+          class="menu-item d-flex align-items-center gap-2 w-100 px-3 py-3 border-0 small fw-medium text-start text-danger-light border-top border-white border-opacity-10"
           @click="handleLogout"
         >
           <van-icon name="revoke" size="16" />
@@ -103,7 +103,48 @@ function handleUpdate() {
   <!-- Backdrop to close menu -->
   <div
     v-if="showMenu"
-    class="fixed inset-0 z-40"
+    class="position-fixed top-0 start-0 w-100 h-100"
+    style="z-index: 40"
     @click="showMenu = false"
   />
 </template>
+
+<style scoped>
+.sidenav {
+  width: 5rem;
+  background-color: var(--c-primary);
+}
+
+.sidenav-btn {
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidenav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidenav-btn.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.popup-menu {
+  bottom: 100%;
+  left: 100%;
+  margin-left: 0.25rem;
+  margin-bottom: 0.25rem;
+  width: 10rem;
+  background-color: var(--c-primary-light, #2a2a4a);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 50;
+}
+
+.menu-item {
+  background: transparent;
+  cursor: pointer;
+}
+
+.text-danger-light {
+  color: #fca5a5;
+}
+</style>

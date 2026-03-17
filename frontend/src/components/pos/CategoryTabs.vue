@@ -13,12 +13,10 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex gap-2 overflow-x-auto px-3 py-2 no-scrollbar">
+  <div class="d-flex gap-2 overflow-auto px-3 py-2 no-scrollbar">
     <button
-      class="shrink-0 px-4 py-2 rounded-full text-sm font-medium active:scale-95"
-      :class="activeId === null
-        ? 'bg-primary text-white'
-        : 'bg-white text-gray-900 border border-gray-300'"
+      class="btn flex-shrink-0 small fw-medium tab-btn"
+      :class="activeId === null ? 'btn-active' : 'btn-inactive'"
       @click="emit('select', null)"
     >
       {{ LOCALE.allCategories }}
@@ -26,10 +24,8 @@ const emit = defineEmits<{
     <button
       v-for="cat in categories"
       :key="cat.id"
-      class="shrink-0 px-4 py-2 rounded-full text-sm font-medium"
-      :class="activeId === cat.id
-        ? 'bg-primary text-white'
-        : 'bg-white text-gray-900 border border-gray-300'"
+      class="btn flex-shrink-0 small fw-medium tab-btn"
+      :class="activeId === cat.id ? 'btn-active' : 'btn-inactive'"
       @click="emit('select', cat.id)"
     >
       {{ cat.name }}
@@ -40,4 +36,32 @@ const emit = defineEmits<{
 <style scoped>
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.tab-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 50rem;
+  font-size: 0.875rem;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.btn-active {
+  background-color: var(--c-primary);
+  color: #fff;
+  border: 1px solid var(--c-primary);
+}
+.btn-active:hover,
+.btn-active:active {
+  background-color: var(--c-primary);
+  color: #fff;
+}
+.btn-inactive {
+  background-color: #fff;
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
+}
+.btn-inactive:hover,
+.btn-inactive:active {
+  background-color: #fff;
+  color: var(--c-text);
+}
 </style>

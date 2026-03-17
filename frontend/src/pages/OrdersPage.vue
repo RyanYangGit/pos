@@ -38,22 +38,22 @@ function handleSelectOrder(order: OrderDoc) {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-surface">
-    <div class="p-3 space-y-2">
-      <h1 class="text-lg font-bold text-gray-800 px-1">{{ LOCALE.orderHistory }}</h1>
+  <div class="orders-page d-flex flex-column bg-surface h-100">
+    <div class="p-3">
+      <h1 class="fs-5 fw-bold text-primary px-1 mb-2">{{ LOCALE.orderHistory }}</h1>
 
       <!-- Filters -->
-      <div class="flex gap-2 overflow-x-auto no-scrollbar">
+      <div class="d-flex gap-2 overflow-auto no-scrollbar">
         <select
           v-model="selectedDate"
-          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-800 outline-none"
+          class="form-select form-select-sm filter-select"
         >
           <option value="">{{ LOCALE.filterByDate }}</option>
           <option v-for="d in dateOptions" :key="d" :value="d">{{ d }}</option>
         </select>
         <select
           v-model="selectedPayment"
-          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-800 outline-none"
+          class="form-select form-select-sm filter-select"
         >
           <option value="">{{ LOCALE.filterByPayment }}</option>
           <option v-for="m in PAYMENT_METHODS" :key="m.value" :value="m.value">
@@ -63,7 +63,7 @@ function handleSelectOrder(order: OrderDoc) {
       </div>
     </div>
 
-    <div class="flex-1 overflow-auto px-3 pb-3">
+    <div class="flex-grow-1 overflow-auto px-3 pb-3">
       <OrderList :orders="filteredOrders" @select="handleSelectOrder" />
     </div>
 
@@ -75,6 +75,35 @@ function handleSelectOrder(order: OrderDoc) {
 </template>
 
 <style scoped>
+.orders-page {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-surface: #f5f6f8;
+  --c-border: #dee2e6;
+  --c-text: #1a1a2e;
+  --c-text-muted: #6c757d;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+.bg-surface { background-color: var(--c-surface); }
+.text-primary { color: var(--c-text) !important; }
+.h-100 { height: 100%; }
+
+.filter-select {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  font-size: 0.875rem;
+  color: var(--c-text);
+  background-color: #fff;
+  min-height: 44px;
+}
+.filter-select:focus {
+  outline: none;
+  border-color: var(--c-primary);
+}
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
