@@ -28,7 +28,10 @@ export function useAuth() {
       const user = users[0]!
       const data = user.toJSON() as UserDoc
       currentUser.value = data
-      if (data.pinHash) {
+      // Admin / super_admin skip PIN lock
+      if (data.role === 'admin' || data.role === 'super_admin') {
+        authScreen.value = 'app'
+      } else if (data.pinHash) {
         authScreen.value = 'pin'
       } else {
         authScreen.value = 'login'
@@ -64,7 +67,12 @@ export function useAuth() {
 
     await db.users.insert(doc)
     currentUser.value = doc
-    authScreen.value = 'set-pin'
+    // Admin / super_admin skip PIN setup, go straight to app
+    if (doc.role === 'admin' || doc.role === 'super_admin') {
+      authScreen.value = 'app'
+    } else {
+      authScreen.value = 'set-pin'
+    }
   }
 
   async function setPin(pin: string) {
@@ -96,6 +104,11 @@ export function useAuth() {
   }
 
   async function lock() {
+    const role = currentUser.value?.role
+    // Admin / super_admin don't use PIN lock
+    if (role === 'admin' || role === 'super_admin') {
+      return
+    }
     if (currentUser.value?.pinHash) {
       authScreen.value = 'pin'
     } else {
