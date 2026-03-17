@@ -186,10 +186,11 @@ function handleCameraScanned(code: string) {
             </button>
           </div>
           <button
-            class="shrink-0 h-11 px-3 rounded-xl bg-accent text-white text-sm font-bold flex items-center gap-1 active:scale-95"
+            class="shrink-0 h-11 px-3 rounded-xl text-sm font-bold flex items-center gap-1 active:scale-95"
+            style="background:#e94560;color:#fff"
             @click="showCameraScanner = true"
           >
-            <van-icon name="scan" size="18" />
+            <van-icon name="scan" size="18" color="#fff" />
             {{ LOCALE.openCamera }}
           </button>
         </div>
