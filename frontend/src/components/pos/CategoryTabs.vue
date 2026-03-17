@@ -16,9 +16,9 @@ const emit = defineEmits<{
   <div class="flex gap-2 overflow-x-auto px-3 py-2 no-scrollbar">
     <button
       class="shrink-0 px-4 py-2 rounded-full text-sm font-medium active:scale-95"
-      :style="activeId === null
-        ? { background: '#1a1a2e', color: '#fff' }
-        : { background: '#fff', color: '#111', border: '1px solid #999' }"
+      :class="activeId === null
+        ? 'bg-primary text-white'
+        : 'bg-white text-gray-900 border border-gray-300'"
       @click="emit('select', null)"
     >
       {{ LOCALE.allCategories }}
@@ -27,9 +27,9 @@ const emit = defineEmits<{
       v-for="cat in categories"
       :key="cat.id"
       class="shrink-0 px-4 py-2 rounded-full text-sm font-medium"
-      :style="activeId === cat.id
-        ? { background: '#1a1a2e', color: '#fff' }
-        : { background: '#fff', color: '#111', border: '1px solid #999' }"
+      :class="activeId === cat.id
+        ? 'bg-primary text-white'
+        : 'bg-white text-gray-900 border border-gray-300'"
       @click="emit('select', cat.id)"
     >
       {{ cat.name }}

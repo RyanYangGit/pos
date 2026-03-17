@@ -73,31 +73,27 @@ function handleUpdate() {
       <!-- Popup menu -->
       <div
         v-if="showMenu"
-        class="absolute bottom-full left-full ml-1 mb-1 w-40 rounded-xl overflow-hidden z-50"
-        style="background:#16213e;border:1px solid rgba(255,255,255,0.2)"
+        class="absolute bottom-full left-full ml-1 mb-1 w-40 bg-primary-light rounded-xl border border-white/20 overflow-hidden z-50"
       >
         <button
-          class="w-full px-4 py-3 text-sm font-medium text-left flex items-center gap-2"
-          style="color:#fff"
+          class="w-full px-4 py-3 text-sm text-white font-medium text-left flex items-center gap-2"
           @click="handleLock"
         >
-          <van-icon name="lock" size="16" color="#fff" />
+          <van-icon name="lock" size="16" />
           鎖定螢幕
         </button>
         <button
-          class="w-full px-4 py-3 text-sm font-medium text-left flex items-center gap-2"
-          style="color:#fff;border-top:1px solid rgba(255,255,255,0.15)"
+          class="w-full px-4 py-3 text-sm text-white font-medium text-left flex items-center gap-2 border-t border-white/10"
           @click="handleUpdate"
         >
-          <van-icon name="replay" size="16" color="#fff" />
+          <van-icon name="replay" size="16" />
           檢查更新
         </button>
         <button
-          class="w-full px-4 py-3 text-sm font-medium text-left flex items-center gap-2"
-          style="color:#ff6b6b;border-top:1px solid rgba(255,255,255,0.15)"
+          class="w-full px-4 py-3 text-sm text-red-300 font-medium text-left flex items-center gap-2 border-t border-white/10"
           @click="handleLogout"
         >
-          <van-icon name="revoke" size="16" color="#ff6b6b" />
+          <van-icon name="revoke" size="16" />
           登出
         </button>
       </div>
