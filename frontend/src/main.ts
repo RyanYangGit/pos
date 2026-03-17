@@ -10,14 +10,20 @@ import './styles/index.css'
 
 Locale.use('zh-TW', zhTW)
 
-// Auto-reload when new version detected
-registerSW({
+// Auto-update: activate new SW immediately, then reload
+const updateSW = registerSW({
   onNeedRefresh() {
-    console.log('[PWA] New version available, reloading...')
-    window.location.reload()
+    console.log('[PWA] New version available, updating...')
+    updateSW(true)
   },
   onOfflineReady() {
     console.log('[PWA] Offline ready')
+  },
+  onRegisteredSW(_url, registration) {
+    // Check for updates every 5 minutes
+    if (registration) {
+      setInterval(() => { registration.update() }, 5 * 60 * 1000)
+    }
   },
 })
 
