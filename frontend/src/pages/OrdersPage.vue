@@ -46,14 +46,14 @@ function handleSelectOrder(order: OrderDoc) {
       <div class="flex gap-2 overflow-x-auto no-scrollbar">
         <select
           v-model="selectedDate"
-          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-600 outline-none"
+          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-800 outline-none"
         >
           <option value="">{{ LOCALE.filterByDate }}</option>
           <option v-for="d in dateOptions" :key="d" :value="d">{{ d }}</option>
         </select>
         <select
           v-model="selectedPayment"
-          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-600 outline-none"
+          class="h-9 px-3 rounded-lg bg-white border border-gray-200 text-sm text-gray-800 outline-none"
         >
           <option value="">{{ LOCALE.filterByPayment }}</option>
           <option v-for="m in PAYMENT_METHODS" :key="m.value" :value="m.value">

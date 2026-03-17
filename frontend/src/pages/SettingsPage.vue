@@ -208,15 +208,15 @@ async function handleLogout() {
         </div>
         <div class="px-5 py-4 flex flex-wrap gap-2">
           <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
             @click="handleExportCsv"
           >匯出 CSV</button>
           <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
             @click="handleExportJson"
           >匯出 JSON 備份</button>
           <button
-            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+            class="h-9 px-4 rounded-lg border border-gray-200 text-sm text-gray-800 hover:bg-gray-50"
             @click="handleImport"
           >匯入 JSON</button>
           <button

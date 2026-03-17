@@ -485,14 +485,14 @@ async function handleConfirmImport() {
       <!-- Actions (products tab) -->
       <div v-if="activeTab === 'products' && (!isSuperAdmin || selectedCompanyId)" class="flex items-center gap-2">
         <button
-          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-1.5"
           @click="downloadTemplate"
         >
           <van-icon name="down" size="14" />
           下載範本
         </button>
         <button
-          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1.5"
+          class="h-9 px-4 rounded-lg border border-gray-300 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-1.5"
           @click="triggerImport"
         >
           <van-icon name="down" size="14" />
@@ -586,7 +586,7 @@ async function handleConfirmImport() {
                     </div>
                     <button
                       v-else
-                      class="px-2 py-1 rounded hover:bg-gray-100 text-gray-700 min-w-[3rem]"
+                      class="px-2 py-1 rounded hover:bg-gray-100 text-gray-800 min-w-[3rem]"
                       @click="startEditStock(product)"
                     >
                       {{ product.stock !== null ? product.stock : '不限' }}
@@ -597,7 +597,7 @@ async function handleConfirmImport() {
                   <td class="px-4 py-3 text-center">
                     <span
                       class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer select-none"
-                      :class="product.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                      :class="product.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
                       @click="apiToggleProduct(product.id)"
                     >
                       {{ product.isActive ? '上架中' : '已下架' }}
@@ -718,7 +718,7 @@ async function handleConfirmImport() {
               </td>
               <td class="px-4 py-3 text-center">
                 <div class="flex items-center justify-center gap-2">
-                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50" @click="openEditUser(user)">編輯</button>
+                  <button class="h-7 px-3 rounded-lg border border-gray-200 text-xs text-gray-800 hover:bg-gray-50" @click="openEditUser(user)">編輯</button>
                   <button class="h-7 px-3 rounded-lg border border-red-200 text-xs text-red-500 hover:bg-red-50" @click="handleDeleteUser(user.id)">刪除</button>
                 </div>
               </td>
@@ -808,7 +808,7 @@ async function handleConfirmImport() {
           </div>
         </div>
         <div class="flex gap-3 pt-1">
-          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50" @click="showUserForm = false">取消</button>
+          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50" @click="showUserForm = false">取消</button>
           <button class="flex-1 h-11 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90" @click="handleSaveUser">儲存</button>
         </div>
       </div>
@@ -829,7 +829,7 @@ async function handleConfirmImport() {
           </div>
         </div>
         <div class="flex gap-3 pt-1">
-          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50" @click="showCompanyForm = false">取消</button>
+          <button class="flex-1 h-11 rounded-xl border border-gray-200 text-sm text-gray-800 hover:bg-gray-50" @click="showCompanyForm = false">取消</button>
           <button class="flex-1 h-11 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90" :disabled="!companyForm.name.trim()" @click="handleSaveCompany">儲存</button>
         </div>
       </div>

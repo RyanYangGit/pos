@@ -93,7 +93,7 @@ function handleClose() {
       <!-- Actions -->
       <div class="flex gap-3">
         <button
-          class="flex-1 h-14 rounded-xl text-base font-medium border border-gray-300 text-gray-600 transition-all active:scale-[0.98] active:bg-gray-50"
+          class="flex-1 h-14 rounded-xl text-base font-medium border border-gray-300 text-gray-800 transition-all active:scale-[0.98] active:bg-gray-50"
           @click="handleClose"
         >
           {{ LOCALE.cancel }}

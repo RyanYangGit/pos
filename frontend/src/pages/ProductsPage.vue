@@ -175,7 +175,7 @@ async function handleDeleteCategory(id: string) {
         <div class="p-3">
           <div class="flex gap-2 mb-3">
             <button
-              class="flex-1 h-12 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 text-sm font-medium active:bg-gray-50"
+              class="flex-1 h-12 rounded-xl border-2 border-dashed border-gray-300 text-gray-800 text-sm font-medium active:bg-gray-50"
               @click="handleAddProduct"
             >
               + {{ LOCALE.addProduct }}
@@ -266,7 +266,7 @@ async function handleDeleteCategory(id: string) {
               class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
               :class="importCategoryId === cat.id
                 ? 'border-accent bg-red-50 text-accent'
-                : 'border-gray-200 text-gray-600'"
+                : 'border-gray-200 text-gray-800'"
               @click="importCategoryId = cat.id"
             >
               {{ cat.name }}
@@ -296,7 +296,7 @@ async function handleDeleteCategory(id: string) {
 
         <div class="flex gap-3">
           <button
-            class="flex-1 h-12 rounded-xl border border-gray-300 text-sm text-gray-600 active:bg-gray-50"
+            class="flex-1 h-12 rounded-xl border border-gray-300 text-sm text-gray-800 active:bg-gray-50"
             @click="showImportDialog = false"
           >
             取消
