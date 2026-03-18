@@ -17,7 +17,6 @@ export const TAB_DEFINITIONS: TabDefinition[] = [
   { path: '/products', name: 'products', label: LOCALE.tabProducts, icon: 'apps-o', emoji: '\u{1F4E6}', roles: ['admin'] },
   { path: '/dashboard', name: 'dashboard', label: LOCALE.tabDashboard, icon: 'chart-trending-o', emoji: '\u{1F4CA}', roles: ['admin'] },
   { path: '/admin', name: 'admin', label: LOCALE.tabAdmin, icon: 'manager-o', emoji: '\u{1F5A5}', roles: ['admin', 'super_admin'] },
-  { path: '/settings', name: 'settings', label: LOCALE.tabSettings, icon: 'setting-o', emoji: '\u2699\uFE0F', roles: ['admin', 'super_admin'] },
 ]
 
 export function getTabsForRole(role: Role): TabDefinition[] {

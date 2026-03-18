@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import { getTabsForRole } from '@/constants/roles'
 import { LOCALE } from '@/constants/locale'
+import { APP_VERSION } from '@/version'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,6 +97,9 @@ function handleUpdate() {
           <van-icon name="revoke" size="16" />
           登出
         </button>
+        <div class="px-3 py-2 text-center border-top border-white border-opacity-10">
+          <span class="version-label">{{ APP_VERSION }}</span>
+        </div>
       </div>
     </div>
   </nav>
@@ -146,5 +150,10 @@ function handleUpdate() {
 
 .text-danger-light {
   color: #fca5a5;
+}
+.version-label {
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.5px;
 }
 </style>

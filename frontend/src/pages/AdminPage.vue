@@ -2,13 +2,89 @@
 import { ref, onMounted } from 'vue'
 import { showConfirmDialog, showSuccessToast, showFailToast } from 'vant'
 import { useAuth } from '@/composables/useAuth'
+import { useSync } from '@/composables/useSync'
 import { authHeaders } from '@/utils/token'
+import { getDatabase } from '@/db'
+import { exportOrdersCsv, exportAllJson, importJson } from '@/services/export'
+import { LOCALE } from '@/constants/locale'
 
 const { isSuperAdmin } = useAuth()
+const { syncEnabled, toggleSync } = useSync()
 
 // --- Tabs ---
-type Tab = 'users' | 'companies'
+type Tab = 'users' | 'companies' | 'shop' | 'data'
 const activeTab = ref<Tab>('users')
+
+// --- Shop settings ---
+const shopName = ref('')
+const deviceName = ref('')
+const orderPrefix = ref('')
+
+async function loadShopSettings() {
+  const db = getDatabase()
+  const settings = await db.app_settings.findOne('default').exec()
+  if (settings) {
+    shopName.value = settings.shopName
+    deviceName.value = settings.deviceName
+    orderPrefix.value = settings.orderPrefix
+  }
+}
+
+async function saveSettings() {
+  const db = getDatabase()
+  const settings = await db.app_settings.findOne('default').exec()
+  if (settings) {
+    await settings.patch({
+      shopName: shopName.value,
+      deviceName: deviceName.value,
+      orderPrefix: orderPrefix.value,
+    })
+    showSuccessToast('已儲存')
+  }
+}
+
+// --- Data management ---
+async function handleExportCsv() {
+  try {
+    await exportOrdersCsv()
+    showSuccessToast('CSV 已匯出')
+  } catch { showFailToast('匯出失敗') }
+}
+
+async function handleExportJson() {
+  try {
+    await exportAllJson()
+    showSuccessToast('JSON 已匯出')
+  } catch { showFailToast('匯出失敗') }
+}
+
+function handleImport() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.onchange = async () => {
+    const file = input.files?.[0]
+    if (!file) return
+    try {
+      await importJson(file)
+      showSuccessToast('匯入成功')
+    } catch { showFailToast('匯入失敗') }
+  }
+  input.click()
+}
+
+async function handleClearData() {
+  try {
+    await showConfirmDialog({ title: '清除資料', message: LOCALE.clearDataConfirm })
+    const db = getDatabase()
+    await Promise.all([
+      db.categories.find().remove(),
+      db.products.find().remove(),
+      db.orders.find().remove(),
+    ])
+    showSuccessToast('已清除')
+  } catch { /* cancelled */ }
+}
 
 // --- Companies ---
 interface CompanyItem { id: string; name: string; isActive: boolean }
@@ -143,6 +219,7 @@ onMounted(async () => {
     await loadCompanies()
   }
   await loadUsers()
+  await loadShopSettings()
 })
 </script>
 
@@ -163,6 +240,16 @@ onMounted(async () => {
           :class="activeTab === 'companies' ? 'tab-btn--active' : ''"
           @click="activeTab = 'companies'; loadCompanies()"
         >公司管理</button>
+        <button
+          class="tab-btn"
+          :class="activeTab === 'shop' ? 'tab-btn--active' : ''"
+          @click="activeTab = 'shop'"
+        >店舖設定</button>
+        <button
+          class="tab-btn"
+          :class="activeTab === 'data' ? 'tab-btn--active' : ''"
+          @click="activeTab = 'data'"
+        >資料管理</button>
       </div>
     </div>
 
@@ -256,6 +343,61 @@ onMounted(async () => {
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- Shop Settings Tab -->
+    <div v-else-if="activeTab === 'shop'" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="container-narrow">
+        <div class="bg-white rounded border mb-4">
+          <div class="px-4 py-3 border-bottom">
+            <h2 class="small fw-semibold text-muted mb-0">店舖設定</h2>
+          </div>
+          <div>
+            <div class="d-flex align-items-center px-4 py-3 gap-3 border-bottom">
+              <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.shopName }}</label>
+              <input v-model="shopName" type="text" class="form-control form-control-sm input-custom" @blur="saveSettings" />
+            </div>
+            <div class="d-flex align-items-center px-4 py-3 gap-3 border-bottom">
+              <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.deviceName }}</label>
+              <input v-model="deviceName" type="text" class="form-control form-control-sm input-custom" @blur="saveSettings" />
+            </div>
+            <div class="d-flex align-items-center px-4 py-3 gap-3">
+              <label class="form-label-fixed small text-muted flex-shrink-0 mb-0">{{ LOCALE.orderPrefix }}</label>
+              <input v-model="orderPrefix" type="text" placeholder="A" class="form-control form-control-sm input-custom" style="width: 128px;" @blur="saveSettings" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded border">
+          <div class="px-4 py-3 border-bottom">
+            <h2 class="small fw-semibold text-muted mb-0">雲端同步</h2>
+          </div>
+          <div class="d-flex align-items-center justify-content-between px-4 py-3">
+            <div>
+              <div class="small text-primary">{{ LOCALE.cloudSync }}</div>
+              <div class="extra-small text-muted mt-1">開啟後將資料同步至伺服器</div>
+            </div>
+            <van-switch :model-value="syncEnabled" size="24" @update:model-value="toggleSync($event as boolean)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Management Tab -->
+    <div v-else-if="activeTab === 'data'" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="container-narrow">
+        <div class="bg-white rounded border">
+          <div class="px-4 py-3 border-bottom">
+            <h2 class="small fw-semibold text-muted mb-0">資料管理</h2>
+          </div>
+          <div class="px-4 py-3 d-flex flex-wrap gap-2">
+            <button class="btn-outline" @click="handleExportCsv">匯出 CSV</button>
+            <button class="btn-outline" @click="handleExportJson">匯出 JSON 備份</button>
+            <button class="btn-outline" @click="handleImport">匯入 JSON</button>
+            <button class="btn-danger-outline" @click="handleClearData">清除所有資料</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -523,4 +665,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 .btn-primary-dialog:disabled { opacity: 0.4; }
+
+.container-narrow { max-width: 672px; }
+.form-label-fixed { width: 96px; }
 </style>
