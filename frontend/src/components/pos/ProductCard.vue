@@ -18,14 +18,6 @@ const emit = defineEmits<{
     :disabled="product.stock === 0"
     @click="emit('tap', product)"
   >
-    <div
-      v-if="product.imageDataUrl"
-      class="product-img mb-2"
-      :style="{ backgroundImage: `url(${product.imageDataUrl})` }"
-    />
-    <div v-else class="product-img-placeholder d-flex align-items-center justify-content-center mb-2">
-      &#128230;
-    </div>
     <span class="small text-center product-name">
       {{ product.name }}
     </span>
@@ -50,20 +42,6 @@ const emit = defineEmits<{
 .product-card:hover,
 .product-card:active {
   background-color: #fff;
-}
-.product-img {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background-size: cover;
-  background-position: center;
-}
-.product-img-placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background-color: var(--c-surface);
-  font-size: 1.5rem;
 }
 .product-name {
   color: var(--c-text);
