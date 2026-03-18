@@ -49,8 +49,9 @@ function onGlobalKeydown(e: KeyboardEvent) {
 
   if (e.key === 'Enter') {
     if (scanBuffer.length >= 4) {
-      // Looks like a barcode scanner burst
+      // Looks like a barcode scanner burst — stop event so input's @keydown.enter won't fire again
       e.preventDefault()
+      e.stopImmediatePropagation()
       markScannerActive()
       processScanBuffer(scanBuffer)
     }
