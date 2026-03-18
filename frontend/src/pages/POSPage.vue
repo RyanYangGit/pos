@@ -127,7 +127,7 @@ function handleBarcodeSubmit() {
     addItem(product)
     showSuccessToast(`${product.name} ${LOCALE.barcodeAdded}`)
   } else {
-    showFailToast(LOCALE.barcodeNotFound)
+    showFailToast(`${LOCALE.barcodeNotFound}\n條碼: ${code}`)
   }
 
   barcodeInput.value = ''
