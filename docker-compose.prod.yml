@@ -10,6 +10,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - reverse-proxy
     restart: unless-stopped
 
   web:
@@ -18,4 +21,12 @@ services:
       - "127.0.0.1:8087:80"
     depends_on:
       - api
+    networks:
+      - default
+      - reverse-proxy
     restart: unless-stopped
+
+networks:
+  reverse-proxy:
+    external: true
+    name: reverse-proxy_default
