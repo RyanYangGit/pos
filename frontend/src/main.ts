@@ -10,6 +10,13 @@ import './styles/index.css'
 
 Locale.use('zh-TW', zhTW)
 
+// Force check for SW updates on every page load
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.update())
+  })
+}
+
 // Auto-update: activate new SW immediately, then reload
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -20,9 +27,9 @@ const updateSW = registerSW({
     console.log('[PWA] Offline ready')
   },
   onRegisteredSW(_url, registration) {
-    // Check for updates every 5 minutes
+    // Check for updates every 1 minute
     if (registration) {
-      setInterval(() => { registration.update() }, 5 * 60 * 1000)
+      setInterval(() => { registration.update() }, 60 * 1000)
     }
   },
 })

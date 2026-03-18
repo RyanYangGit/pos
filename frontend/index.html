@@ -13,6 +13,14 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      // Force SW update before app loads
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(function(r){
+          r.forEach(function(reg){reg.update()})
+        })
+      }
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

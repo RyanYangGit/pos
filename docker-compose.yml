@@ -2,7 +2,8 @@ services:
   api:
     build: ./backend
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
+      - "100.71.204.109:8001:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://pos:pos@host.docker.internal:5432/pos_dev
       - ENV=development

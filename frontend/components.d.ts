@@ -30,6 +30,8 @@ declare module 'vue' {
     TopProducts: typeof import('./src/components/dashboard/TopProducts.vue')['default']
     VanButton: typeof import('vant/es')['Button']
     VanCell: typeof import('vant/es')['Cell']
+    VanDatePicker: typeof import('vant/es')['DatePicker']
+    VanDialog: typeof import('vant/es')['Dialog']
     VanField: typeof import('vant/es')['Field']
     VanIcon: typeof import('vant/es')['Icon']
     VanLoading: typeof import('vant/es')['Loading']

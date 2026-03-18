@@ -36,9 +36,9 @@
   animation: none !important;
 }
 
-/* Override Vant button color reset */
+/* Override Vant button color reset (no !important — let .btn-* classes win) */
 button:not(.van-button) {
-  color: inherit !important;
+  color: inherit;
 }
 
 html, body {

@@ -18,6 +18,7 @@ export interface OrderDoc {
   deviceId: string
   createdAt: number
   syncedAt: number | null
+  cancelledAt: number | null
 }
 
 export const orderSchema: RxJsonSchema<OrderDoc> = {
@@ -50,6 +51,7 @@ export const orderSchema: RxJsonSchema<OrderDoc> = {
     deviceId: { type: 'string' },
     createdAt: { type: 'number', multipleOf: 1, minimum: 0, maximum: 99999999999999 },
     syncedAt: { type: ['number', 'null'] },
+    cancelledAt: { type: ['number', 'null'] },
   },
   required: ['id', 'orderNumber', 'items', 'totalAmount', 'paymentMethod', 'deviceId', 'createdAt'],
   indexes: ['createdAt', 'orderNumber'],

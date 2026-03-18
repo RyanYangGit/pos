@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { showSuccessToast, showFailToast } from 'vant'
 import { LOCALE } from '@/constants/locale'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/constants/payment'
 import { formatDate } from '@/utils/format'
@@ -8,7 +9,7 @@ import type { OrderDoc } from '@/db/schemas/order'
 import OrderList from '@/components/order/OrderList.vue'
 import OrderDetail from '@/components/order/OrderDetail.vue'
 
-const { orders } = useOrders()
+const { orders, cancelOrder } = useOrders()
 
 const selectedDate = ref<string>('')
 const selectedPayment = ref<string>('')
@@ -34,6 +35,16 @@ const dateOptions = computed(() => {
 function handleSelectOrder(order: OrderDoc) {
   selectedOrder.value = order
   showDetail.value = true
+}
+
+async function handleCancelOrder(orderId: string) {
+  try {
+    await cancelOrder(orderId)
+    showDetail.value = false
+    showSuccessToast(LOCALE.cancelSuccess)
+  } catch (e: any) {
+    showFailToast(e?.message || '取消失敗')
+  }
 }
 </script>
 
@@ -70,6 +81,7 @@ function handleSelectOrder(order: OrderDoc) {
     <OrderDetail
       v-model:show="showDetail"
       :order="selectedOrder"
+      @cancel="handleCancelOrder"
     />
   </div>
 </template>

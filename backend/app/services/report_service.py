@@ -16,11 +16,12 @@ async def get_daily_report(
     start_ts = int(target_date.timestamp() * 1000)
     end_ts = start_ts + 86400000  # +24h in ms
 
-    # Get orders for the day
+    # Get orders for the day (exclude cancelled)
     query = select(Order).where(
         Order.exhibition_id == exhibition_id,
         Order.created_at >= start_ts,
         Order.created_at < end_ts,
+        Order.cancelled_at.is_(None),
     )
     result = await db.execute(query)
     orders = result.scalars().all()

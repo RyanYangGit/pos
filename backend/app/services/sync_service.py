@@ -183,12 +183,12 @@ async def push_orders(
         new_order = Order(
             id=doc["id"],
             exhibition_id=exhibition_id,
-            device_id=doc.get("deviceId", ""),
-            order_number=doc["orderNumber"],
-            total_amount=doc["totalAmount"],
-            payment_method=doc["paymentMethod"],
+            device_id=doc.get("deviceId", doc.get("device_id", "")),
+            order_number=doc.get("orderNumber", doc.get("order_number", "")),
+            total_amount=doc.get("totalAmount", doc.get("total_amount", 0)),
+            payment_method=doc.get("paymentMethod", doc.get("payment_method", "")),
             note=doc.get("note"),
-            created_at=doc.get("createdAt", 0),
+            created_at=doc.get("createdAt", doc.get("created_at", 0)),
         )
         db.add(new_order)
 
@@ -196,11 +196,11 @@ async def push_orders(
             new_item = OrderItem(
                 id=str(uuid.uuid4()),
                 order_id=doc["id"],
-                product_id=item["productId"],
-                product_name=item["productName"],
-                unit_price=item["unitPrice"],
-                quantity=item["quantity"],
-                subtotal=item["subtotal"],
+                product_id=item.get("productId", item.get("product_id", "")),
+                product_name=item.get("productName", item.get("product_name", "")),
+                unit_price=item.get("unitPrice", item.get("unit_price", 0)),
+                quantity=item.get("quantity", 0),
+                subtotal=item.get("subtotal", 0),
             )
             db.add(new_item)
 

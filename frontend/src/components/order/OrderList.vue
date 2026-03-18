@@ -22,8 +22,11 @@ const emit = defineEmits<{
       @click="emit('select', order)"
     >
       <div class="d-flex align-items-center justify-content-between mb-1">
-        <span class="small fw-bold text-primary">{{ order.orderNumber }}</span>
-        <span class="fs-6 fw-bold text-accent">{{ formatCurrency(order.totalAmount) }}</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small fw-bold text-primary">{{ order.orderNumber }}</span>
+          <span v-if="order.cancelledAt" class="badge-cancelled">{{ LOCALE.cancelled }}</span>
+        </div>
+        <span class="fs-6 fw-bold" :class="order.cancelledAt ? 'text-muted text-decoration-line-through' : 'text-accent'">{{ formatCurrency(order.totalAmount) }}</span>
       </div>
       <div class="d-flex align-items-center justify-content-between extra-small text-muted">
         <span>{{ formatDateTime(order.createdAt) }}</span>
@@ -31,7 +34,7 @@ const emit = defineEmits<{
           <span class="badge-payment">
             {{ PAYMENT_LABEL[order.paymentMethod as PaymentMethod] }}
           </span>
-          <span :class="order.syncedAt ? 'text-success' : 'text-warning'" class="extra-small">
+          <span v-if="!order.cancelledAt" :class="order.syncedAt ? 'text-success' : 'text-warning'" class="extra-small">
             {{ order.syncedAt ? LOCALE.synced : LOCALE.notSynced }}
           </span>
         </div>
@@ -83,4 +86,14 @@ const emit = defineEmits<{
 
 .text-success { color: #198754 !important; }
 .text-warning { color: #ffc107 !important; }
+.badge-cancelled {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background-color: #dc3545;
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+.text-decoration-line-through { text-decoration: line-through; }
 </style>

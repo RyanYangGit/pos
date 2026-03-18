@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { showSuccessToast, showFailToast } from 'vant'
 import { LOCALE } from '@/constants/locale'
 import { formatCurrency } from '@/utils/format'
@@ -27,10 +27,67 @@ const barcodeInputRef = ref<HTMLInputElement | null>(null)
 
 const filteredProducts = computed(() => getActiveProducts(activeCategoryId.value))
 
+// --- Bluetooth scanner: global keystroke capture ---
+let scanBuffer = ''
+let scanTimeout: ReturnType<typeof setTimeout> | null = null
+const scannerConnected = ref(false)
+let scannerDisconnectTimer: ReturnType<typeof setTimeout> | null = null
+
+function markScannerActive() {
+  scannerConnected.value = true
+  // If no scan activity for 5 minutes, consider disconnected
+  if (scannerDisconnectTimer) clearTimeout(scannerDisconnectTimer)
+  scannerDisconnectTimer = setTimeout(() => { scannerConnected.value = false }, 5 * 60 * 1000)
+}
+
+function onGlobalKeydown(e: KeyboardEvent) {
+  // Ignore if user is typing in a real input (other than barcode input)
+  const target = e.target as HTMLElement
+  const isBarInput = target === barcodeInputRef.value
+  const isOtherInput = (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && !isBarInput
+  if (isOtherInput) return
+
+  if (e.key === 'Enter') {
+    if (scanBuffer.length >= 4) {
+      // Looks like a barcode scanner burst
+      e.preventDefault()
+      markScannerActive()
+      processScanBuffer(scanBuffer)
+    }
+    scanBuffer = ''
+    if (scanTimeout) clearTimeout(scanTimeout)
+    return
+  }
+
+  // Only collect printable single chars
+  if (e.key.length === 1) {
+    // If focus is not on barcode input, prevent default to avoid typing elsewhere
+    if (!isBarInput) e.preventDefault()
+    scanBuffer += e.key
+    // Reset buffer after 100ms of no input (scanner sends chars <50ms apart)
+    if (scanTimeout) clearTimeout(scanTimeout)
+    scanTimeout = setTimeout(() => { scanBuffer = '' }, 100)
+  }
+}
+
+function processScanBuffer(code: string) {
+  const trimmed = code.trim()
+  if (!trimmed) return
+  barcodeInput.value = trimmed
+  handleBarcodeSubmit()
+}
+
 onMounted(() => {
   nextTick(() => {
     barcodeInputRef.value?.focus()
   })
+  document.addEventListener('keydown', onGlobalKeydown, true)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', onGlobalKeydown, true)
+  if (scanTimeout) clearTimeout(scanTimeout)
+  if (scannerDisconnectTimer) clearTimeout(scannerDisconnectTimer)
 })
 
 function handleProductTap(product: ProductDoc) {
@@ -53,8 +110,9 @@ async function handleConfirmCheckout(paymentMethod: PaymentMethod, note: string)
     clearCart()
     showCartSheet.value = false
     showSuccessToast(LOCALE.checkoutSuccess)
-  } catch (e) {
+  } catch (e: any) {
     console.error('Checkout error:', e)
+    showFailToast('結帳失敗: ' + (e?.message || '未知錯誤'))
   }
 }
 
@@ -79,8 +137,11 @@ function handleBarcodeSubmit() {
 }
 
 function handleCameraScanned(code: string) {
-  barcodeInput.value = code
-  handleBarcodeSubmit()
+  // Delay so the popup fully closes before showing toast
+  setTimeout(() => {
+    barcodeInput.value = code
+    handleBarcodeSubmit()
+  }, 300)
 }
 </script>
 
@@ -114,6 +175,9 @@ function handleCameraScanned(code: string) {
         >
           <van-icon name="scan" size="18" />
         </button>
+      </div>
+      <div v-if="scannerConnected" class="scanner-status mt-1">
+        <span class="scanner-dot" />條碼機已連線
       </div>
     </div>
 
@@ -192,6 +256,9 @@ function handleCameraScanned(code: string) {
             <van-icon name="scan" size="18" />
             {{ LOCALE.openCamera }}
           </button>
+        </div>
+        <div v-if="scannerConnected" class="scanner-status mt-1">
+          <span class="scanner-dot" />條碼機已連線
         </div>
       </div>
 
@@ -275,5 +342,26 @@ function handleCameraScanned(code: string) {
 .cart-sidebar {
   width: 320px;
   border-color: var(--c-border);
+}
+.scanner-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #198754;
+  font-weight: 500;
+  padding-left: 2px;
+}
+.scanner-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #198754;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 </style>

@@ -1,10 +1,13 @@
 // Lightweight mock DB using localStorage for persistence
-// Replaces RxDB to keep bundle small for low-end Android tablets
+// Mimics RxDB API including reactive find().$.subscribe()
 
 export type PosCollections = any
 export type PosDatabase = any
 
 const STORAGE_KEY = 'pos_mock_db'
+
+type Listener = () => void
+const listeners: Record<string, Set<Listener>> = {}
 
 function loadStore(): Record<string, any[]> {
   try {
@@ -19,56 +22,78 @@ function saveStore(store: Record<string, any[]>) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
 }
 
-function createCollection(name: string) {
+function notify(name: string) {
+  listeners[name]?.forEach(fn => fn())
+}
+
+function wrapDoc(name: string, item: any) {
   return {
-    find: () => ({
-      exec: () => {
-        const store = loadStore()
-        const items = store[name] || []
-        return Promise.resolve(
-          items.map((item: any) => ({
-            toJSON: () => ({ ...item }),
-            patch: (data: any) => {
-              const s = loadStore()
-              const arr = s[name] || []
-              const idx = arr.findIndex((r: any) => r.id === item.id)
-              if (idx >= 0) {
-                arr[idx] = { ...arr[idx], ...data }
-                s[name] = arr
-                saveStore(s)
-              }
-              return Promise.resolve()
-            },
-          }))
-        )
-      },
-      remove: () => {
-        const store = loadStore()
-        store[name] = []
-        saveStore(store)
-        return Promise.resolve()
-      },
-    }),
+    ...item,
+    toJSON: () => ({ ...item }),
+    get isActive() { return item.isActive },
+    patch: (data: any) => {
+      const s = loadStore()
+      const arr = s[name] || []
+      const idx = arr.findIndex((r: any) => r.id === item.id)
+      if (idx >= 0) {
+        arr[idx] = { ...arr[idx], ...data }
+        s[name] = arr
+        saveStore(s)
+        notify(name)
+      }
+      return Promise.resolve()
+    },
+    remove: () => {
+      const s = loadStore()
+      const arr = s[name] || []
+      s[name] = arr.filter((r: any) => r.id !== item.id)
+      saveStore(s)
+      notify(name)
+      return Promise.resolve()
+    },
+  }
+}
+
+function createCollection(name: string) {
+  if (!listeners[name]) listeners[name] = new Set()
+
+  function getItems() {
+    const store = loadStore()
+    return (store[name] || []).map((item: any) => wrapDoc(name, item))
+  }
+
+  return {
+    find: (_opts?: any) => {
+      const query = {
+        exec: () => Promise.resolve(getItems()),
+        remove: () => {
+          const store = loadStore()
+          store[name] = []
+          saveStore(store)
+          notify(name)
+          return Promise.resolve()
+        },
+        // RxDB-compatible reactive Observable
+        $: {
+          subscribe: (callback: (docs: any[]) => void) => {
+            // Emit current data immediately
+            callback(getItems())
+            // Re-emit on changes
+            const listener = () => callback(getItems())
+            listeners[name]!.add(listener)
+            return { unsubscribe: () => { listeners[name]!.delete(listener) } }
+          },
+        },
+      }
+      return query
+    },
     findOne: (id: string) => ({
       exec: () => {
         const store = loadStore()
         const items = store[name] || []
         const item = items.find((r: any) => r.id === id) || null
         if (!item) return Promise.resolve(null)
-        return Promise.resolve({
-          toJSON: () => ({ ...item }),
-          patch: (data: any) => {
-            const s = loadStore()
-            const arr = s[name] || []
-            const idx = arr.findIndex((r: any) => r.id === id)
-            if (idx >= 0) {
-              arr[idx] = { ...arr[idx], ...data }
-              s[name] = arr
-              saveStore(s)
-            }
-            return Promise.resolve()
-          },
-        })
+        return Promise.resolve(wrapDoc(name, item))
       },
     }),
     insert: (doc: any) => {
@@ -76,6 +101,7 @@ function createCollection(name: string) {
       if (!store[name]) store[name] = []
       store[name].push(doc)
       saveStore(store)
+      notify(name)
       return Promise.resolve(doc)
     },
     upsert: (doc: any) => {
@@ -88,6 +114,7 @@ function createCollection(name: string) {
         store[name].push(doc)
       }
       saveStore(store)
+      notify(name)
       return Promise.resolve(doc)
     },
     count: () => ({
@@ -112,6 +139,20 @@ let ready = false
 export async function initDatabase(): Promise<any> {
   console.log('[MOCK-DB] init (localStorage-backed)')
   ready = true
+
+  // Ensure app_settings 'default' document exists
+  const settings = await mockDb.app_settings.findOne('default').exec()
+  if (!settings) {
+    await mockDb.app_settings.insert({
+      id: 'default',
+      shopName: '',
+      deviceName: 'POS-1',
+      orderPrefix: 'A',
+      nextOrderSeq: 1,
+      lastOrderDate: '',
+    })
+  }
+
   return mockDb
 }
 

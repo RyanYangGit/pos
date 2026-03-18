@@ -57,6 +57,10 @@ export const LOCALE = {
   noOrders: '尚無訂單',
   synced: '已同步',
   notSynced: '未同步',
+  cancelled: '已取消',
+  cancelOrder: '取消訂單',
+  cancelOrderConfirm: '確定要取消此訂單嗎？庫存將會回補。',
+  cancelSuccess: '訂單已取消',
 
   // Dashboard
   dailyReport: '今日報表',

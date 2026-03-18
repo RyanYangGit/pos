@@ -85,6 +85,11 @@ function handleFileChange(e: Event) {
       }
 
       importRows.value = parsed
+      // Auto-create "未分類" if no categories exist
+      if (categories.value.length === 0) {
+        await addCategory('未分類')
+        // addCategory already reloads categories
+      }
       importCategoryId.value = categories.value[0]?.id ?? ''
       showImportDialog.value = true
     } catch {
@@ -95,14 +100,28 @@ function handleFileChange(e: Event) {
 }
 
 async function handleConfirmImport() {
-  if (!importCategoryId.value) return
   importLoading.value = true
   try {
+    // Auto-create "未分類" if none exist
+    if (!importCategoryId.value) {
+      if (categories.value.length === 0) {
+        await addCategory('未分類')
+      }
+      importCategoryId.value = categories.value[0]?.id ?? ''
+      if (!importCategoryId.value) {
+        showFailToast('請先新增分類')
+        importLoading.value = false
+        return
+      }
+    }
     const { created, updated } = await importProducts(
       importRows.value.map(r => ({ ...r, categoryId: importCategoryId.value }))
     )
     showImportDialog.value = false
     showSuccessToast(`新增 ${created} 筆，更新 ${updated} 筆`)
+  } catch (err: any) {
+    console.error('[Import Error]', err)
+    showFailToast('匯入失敗: ' + (err?.message || String(err)))
   } finally {
     importLoading.value = false
   }
@@ -302,7 +321,7 @@ async function handleDeleteCategory(id: string) {
           </button>
           <button
             class="flex-grow-1 btn-accent-import"
-            :disabled="!importCategoryId || importLoading"
+            :disabled="importLoading"
             @click="handleConfirmImport"
           >
             {{ importLoading ? '匯入中...' : '確認匯入' }}

@@ -17,6 +17,7 @@ class Order(Base):
     payment_method: Mapped[str] = mapped_column(String(20))
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[int] = mapped_column(BigInteger)
+    cancelled_at: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")
 

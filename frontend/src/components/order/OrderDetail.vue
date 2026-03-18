@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { LOCALE } from '@/constants/locale'
 import { PAYMENT_LABEL, type PaymentMethod } from '@/constants/payment'
 import { formatCurrency, formatDateTime } from '@/utils/format'
@@ -11,7 +12,10 @@ defineProps<{
 
 const emit = defineEmits<{
   'update:show': [value: boolean]
+  cancel: [orderId: string]
 }>()
+
+const showConfirm = ref(false)
 </script>
 
 <template>
@@ -26,7 +30,11 @@ const emit = defineEmits<{
   >
     <div v-if="order" class="order-detail px-3 pt-5 pb-4">
       <h2 class="fs-5 fw-bold text-center mb-1">{{ LOCALE.orderDetail }}</h2>
-      <div class="text-center small text-muted mb-4">{{ order.orderNumber }}</div>
+      <div class="text-center small text-muted mb-1">{{ order.orderNumber }}</div>
+      <div v-if="order.cancelledAt" class="text-center mb-3">
+        <span class="badge-cancelled">{{ LOCALE.cancelled }}</span>
+      </div>
+      <div v-else class="mb-3"></div>
 
       <div class="d-flex flex-column gap-2 mb-4">
         <div v-for="item in order.items" :key="item.productId" class="d-flex align-items-center justify-content-between py-2 border-bottom">
@@ -41,7 +49,7 @@ const emit = defineEmits<{
       <div class="d-flex flex-column gap-2 small">
         <div class="d-flex justify-content-between">
           <span class="text-muted">{{ LOCALE.total }}</span>
-          <span class="fs-5 fw-bold text-accent">{{ formatCurrency(order.totalAmount) }}</span>
+          <span class="fs-5 fw-bold" :class="order.cancelledAt ? 'text-muted text-decoration-line-through' : 'text-accent'">{{ formatCurrency(order.totalAmount) }}</span>
         </div>
         <div class="d-flex justify-content-between">
           <span class="text-muted">{{ LOCALE.paymentMethod }}</span>
@@ -56,8 +64,30 @@ const emit = defineEmits<{
           <span>{{ order.note }}</span>
         </div>
       </div>
+
+      <!-- Cancel button -->
+      <div v-if="!order.cancelledAt" class="mt-4">
+        <button
+          class="btn btn-outline-danger w-100 cancel-btn"
+          @click="showConfirm = true"
+        >
+          {{ LOCALE.cancelOrder }}
+        </button>
+      </div>
     </div>
   </van-popup>
+
+  <!-- Confirm dialog -->
+  <van-dialog
+    v-model:show="showConfirm"
+    :title="LOCALE.cancelOrder"
+    :message="LOCALE.cancelOrderConfirm"
+    show-cancel-button
+    :confirm-button-text="LOCALE.cancelOrder"
+    :cancel-button-text="LOCALE.cancel"
+    confirm-button-color="#dc3545"
+    @confirm="order && emit('cancel', order.id)"
+  />
 </template>
 
 <style scoped>
@@ -77,4 +107,19 @@ const emit = defineEmits<{
 .border-bottom { border-bottom: 1px solid var(--c-surface) !important; }
 .extra-small { font-size: 0.75rem; }
 .fw-medium { font-weight: 500; }
+.text-decoration-line-through { text-decoration: line-through; }
+.badge-cancelled {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background-color: #dc3545;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.cancel-btn {
+  height: 44px;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
 </style>

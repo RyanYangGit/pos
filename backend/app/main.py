@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.api import sync, auth, reports, export, users, companies, categories, products
+from app.api import sync, auth, reports, export, users, companies, categories, products, orders
 
 app = FastAPI(title="展覽 POS API", version="1.0.0")
 
@@ -22,6 +22,7 @@ app.include_router(users.router)
 app.include_router(companies.router)
 app.include_router(categories.router)
 app.include_router(products.router)
+app.include_router(orders.router)
 
 
 @app.get("/api/health")
