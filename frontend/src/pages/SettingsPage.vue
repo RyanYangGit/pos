@@ -13,6 +13,7 @@ const deviceName = ref('')
 const orderPrefix = ref('')
 const { syncEnabled, toggleSync } = useSync()
 const { currentUser, logout } = useAuth()
+import { APP_VERSION } from '@/version'
 
 const companyName = ref<string | null>(null)
 
@@ -215,6 +216,11 @@ async function handleLogout() {
         </div>
       </div>
 
+      <!-- Version -->
+      <div class="text-center mt-3 mb-2">
+        <span class="version-label">{{ APP_VERSION }}</span>
+      </div>
+
     </div>
   </div>
 </template>
@@ -306,5 +312,10 @@ async function handleLogout() {
 }
 .btn-danger-outline:active {
   background-color: #fff5f5;
+}
+.version-label {
+  font-size: 0.6875rem;
+  color: #adb5bd;
+  letter-spacing: 0.5px;
 }
 </style>
