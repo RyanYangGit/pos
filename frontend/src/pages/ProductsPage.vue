@@ -36,6 +36,7 @@ interface ImportRow {
   price: number
   stock: number | null
   barcode: string | null
+  category: string | null
 }
 
 const showImportDialog = ref(false)
@@ -75,6 +76,7 @@ function handleFileChange(e: Event) {
         price: header.findIndex((h: string) => h.includes('價格')),
         stock: header.findIndex((h: string) => h.includes('庫存')),
         barcode: header.findIndex((h: string) => h.includes('條碼')),
+        category: header.findIndex((h: string) => h.includes('分類')),
       }
 
       if (colIdx.name < 0 || colIdx.price < 0) {
@@ -95,7 +97,10 @@ function handleFileChange(e: Event) {
         const barcode = colIdx.barcode >= 0 && row[colIdx.barcode]
           ? String(row[colIdx.barcode]).trim() || null
           : null
-        parsed.push({ name, price, stock, barcode })
+        const category = colIdx.category >= 0 && row[colIdx.category]
+          ? String(row[colIdx.category]).trim() || null
+          : null
+        parsed.push({ name, price, stock, barcode, category })
       }
 
       if (parsed.length === 0) {
@@ -121,7 +126,29 @@ function handleFileChange(e: Event) {
 async function handleConfirmImport() {
   importLoading.value = true
   try {
-    // Auto-create "未分類" if none exist
+    // Build category map: name → id, auto-create missing ones
+    const categoryMap = new Map<string, string>()
+    for (const cat of categories.value) {
+      categoryMap.set(cat.name, cat.id)
+    }
+
+    // Collect unique category names from import rows
+    const needCategories = new Set<string>()
+    for (const row of importRows.value) {
+      if (row.category && !categoryMap.has(row.category)) {
+        needCategories.add(row.category)
+      }
+    }
+
+    // Auto-create missing categories
+    for (const catName of needCategories) {
+      await addCategory(catName)
+      // Refresh map after adding
+      const newCat = categories.value.find(c => c.name === catName)
+      if (newCat) categoryMap.set(catName, newCat.id)
+    }
+
+    // Ensure fallback category exists
     if (!importCategoryId.value) {
       if (categories.value.length === 0) {
         await addCategory('未分類')
@@ -133,8 +160,13 @@ async function handleConfirmImport() {
         return
       }
     }
+
+    // Map rows with per-row category
     const { created, updated } = await importProducts(
-      importRows.value.map(r => ({ ...r, categoryId: importCategoryId.value }))
+      importRows.value.map(r => ({
+        ...r,
+        categoryId: (r.category && categoryMap.get(r.category)) || importCategoryId.value,
+      }))
     )
     showImportDialog.value = false
     showSuccessToast(`新增 ${created} 筆，更新 ${updated} 筆`)
@@ -321,9 +353,9 @@ async function handleDeleteCategory(id: string) {
       <div class="import-dialog px-3 pt-4 pb-4 d-flex flex-column gap-3">
         <h2 class="fs-6 fw-bold text-primary">匯入商品 ({{ importRows.length }} 筆)</h2>
 
-        <!-- Category selector -->
+        <!-- Fallback category selector (for rows without category) -->
         <div>
-          <div class="small text-muted mb-2">新增商品的分類</div>
+          <div class="small text-muted mb-2">未指定分類的商品歸入</div>
           <div class="d-flex flex-wrap gap-2">
             <button
               v-for="cat in categories"
@@ -346,6 +378,7 @@ async function handleDeleteCategory(id: string) {
             :class="{ 'border-top': i > 0 }"
           >
             <span class="flex-grow-1 fw-medium text-primary text-truncate">{{ row.name }}</span>
+            <span v-if="row.category" class="extra-small text-muted flex-shrink-0">{{ row.category }}</span>
             <span v-if="row.barcode" class="extra-small text-muted font-monospace flex-shrink-0">{{ row.barcode }}</span>
             <span class="text-primary flex-shrink-0">NT${{ row.price }}</span>
             <span class="text-muted flex-shrink-0" style="width: 40px; text-align: right;">
@@ -355,7 +388,7 @@ async function handleDeleteCategory(id: string) {
         </div>
 
         <div class="extra-small text-muted">
-          已有相同條碼的商品會自動更新；無條碼則依品名比對
+          已有相同條碼的商品會自動更新；無條碼則依品名比對。Excel 有「分類」欄位會自動建立分類。
         </div>
 
         <div class="d-flex gap-3">
