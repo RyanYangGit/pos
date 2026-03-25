@@ -13,6 +13,8 @@ const props = defineProps<{
   show: boolean
   categories: CategoryLike[]
   product?: ProductLike | null
+  readonlyName?: boolean
+  canDelete?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -110,6 +112,8 @@ function handleClose() {
           :label="LOCALE.productName"
           :placeholder="`輸入${LOCALE.productName}`"
           required
+          :readonly="readonlyName && isEditing"
+          :class="{ 'field-readonly': readonlyName && isEditing }"
         />
 
         <van-field
@@ -165,7 +169,7 @@ function handleClose() {
           {{ LOCALE.saveProduct }}
         </button>
         <button
-          v-if="isEditing"
+          v-if="isEditing && canDelete !== false"
           class="btn-danger-outline w-100"
           @click="emit('delete')"
         >
@@ -229,5 +233,8 @@ function handleClose() {
 }
 .btn-danger-outline:active {
   background-color: #fff5f5;
+}
+.field-readonly {
+  opacity: 0.6;
 }
 </style>

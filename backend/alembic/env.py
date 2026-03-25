@@ -14,6 +14,7 @@ from app.models.category import Category
 from app.models.product import Product
 from app.models.order import Order, OrderItem
 from app.models.user import User
+from app.models.product_audit_log import ProductAuditLog
 
 config = context.config
 if config.config_file_name is not None:

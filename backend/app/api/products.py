@@ -121,7 +121,10 @@ async def update_product(
     if current_user.role != "super_admin" and prod.exhibition_id != current_user.company_id:
         raise HTTPException(status_code=403, detail="權限不足")
 
-    if body.name is not None: prod.name = body.name
+    if body.name is not None:
+        if current_user.role == "cashier":
+            raise HTTPException(status_code=403, detail="收銀員無法修改商品名稱")
+        prod.name = body.name
     if body.price is not None: prod.price = body.price
     if body.stock is not None: prod.stock = body.stock
     if body.barcode is not None: prod.barcode = body.barcode
@@ -144,6 +147,8 @@ async def delete_product(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if current_user.role == "cashier":
+        raise HTTPException(status_code=403, detail="收銀員無法刪除商品")
     prod = await db.get(Product, product_id)
     if not prod:
         raise HTTPException(status_code=404, detail="商品不存在")

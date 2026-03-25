@@ -12,7 +12,7 @@ const { isSuperAdmin } = useAuth()
 const { syncEnabled, toggleSync } = useSync()
 
 // --- Tabs ---
-type Tab = 'users' | 'companies' | 'shop' | 'data'
+type Tab = 'users' | 'companies' | 'shop' | 'data' | 'audit'
 const activeTab = ref<Tab>('users')
 
 // --- Shop settings ---
@@ -214,6 +214,60 @@ async function handleDeleteUser(id: string) {
   } catch { /* cancelled */ }
 }
 
+// --- Audit Logs ---
+interface AuditLogItem {
+  id: string
+  product_id: string
+  product_name: string
+  user_display_name: string
+  action: string
+  changes: string
+  created_at: string
+}
+const auditLogs = ref<AuditLogItem[]>([])
+
+async function loadAuditLogs() {
+  try {
+    const res = await fetch('/api/product-audit-logs?limit=200', { headers: authHeaders() })
+    if (res.ok) {
+      auditLogs.value = await res.json()
+    }
+  } catch { /* offline */ }
+}
+
+function formatAuditAction(action: string): string {
+  const map: Record<string, string> = { update: '修改', create: '新增', delete: '刪除', toggle: '上/下架' }
+  return map[action] || action
+}
+
+function formatAuditChanges(changesJson: string): string {
+  try {
+    const changes = JSON.parse(changesJson)
+    const labels: Record<string, string> = {
+      price: '價格', stock: '庫存', barcode: '條碼',
+      categoryId: '分類', isActive: '狀態', name: '名稱',
+    }
+    return Object.entries(changes).map(([key, val]: [string, any]) => {
+      const label = labels[key] || key
+      if (val.from !== undefined && val.to !== undefined) {
+        const from = val.from === null ? '無' : val.from === true ? '上架' : val.from === false ? '下架' : val.from
+        const to = val.to === null ? '無' : val.to === true ? '上架' : val.to === false ? '下架' : val.to
+        return `${label}: ${from} → ${to}`
+      }
+      return `${label}: ${JSON.stringify(val)}`
+    }).join('、')
+  } catch { return changesJson }
+}
+
+function formatAuditTime(isoStr: string): string {
+  const d = new Date(isoStr)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  return `${mm}/${dd} ${hh}:${mi}`
+}
+
 onMounted(async () => {
   if (isSuperAdmin.value) {
     await loadCompanies()
@@ -250,6 +304,11 @@ onMounted(async () => {
           :class="activeTab === 'data' ? 'tab-btn--active' : ''"
           @click="activeTab = 'data'"
         >資料管理</button>
+        <button
+          class="tab-btn"
+          :class="activeTab === 'audit' ? 'tab-btn--active' : ''"
+          @click="activeTab = 'audit'; loadAuditLogs()"
+        >修改紀錄</button>
       </div>
     </div>
 
@@ -398,6 +457,51 @@ onMounted(async () => {
             <button class="btn-danger-outline" @click="handleClearData">清除所有資料</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Audit Log Tab -->
+    <div v-else-if="activeTab === 'audit'" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="small fw-semibold text-muted mb-0">商品修改紀錄</h2>
+        <button class="btn-outline d-flex align-items-center gap-1" @click="loadAuditLogs">
+          <van-icon name="replay" size="14" />重新載入
+        </button>
+      </div>
+      <div class="bg-white rounded border overflow-hidden">
+        <table class="table table-sm mb-0 admin-table">
+          <thead>
+            <tr>
+              <th class="text-start">時間</th>
+              <th class="text-start">操作人</th>
+              <th class="text-start">動作</th>
+              <th class="text-start">商品</th>
+              <th class="text-start">變更內容</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="auditLogs.length === 0">
+              <td colspan="5" class="text-center py-5 text-muted">尚無紀錄</td>
+            </tr>
+            <tr v-for="log in auditLogs" :key="log.id">
+              <td class="text-muted extra-small text-nowrap">{{ formatAuditTime(log.created_at) }}</td>
+              <td class="fw-medium text-primary text-nowrap">{{ log.user_display_name }}</td>
+              <td>
+                <span class="badge-action"
+                  :class="{
+                    'badge-update': log.action === 'update',
+                    'badge-create': log.action === 'create',
+                    'badge-delete': log.action === 'delete',
+                    'badge-toggle': log.action === 'toggle',
+                  }">
+                  {{ formatAuditAction(log.action) }}
+                </span>
+              </td>
+              <td class="fw-medium text-primary">{{ log.product_name }}</td>
+              <td class="text-muted extra-small">{{ formatAuditChanges(log.changes) }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -630,6 +734,21 @@ onMounted(async () => {
 .badge-super { background-color: #f3e8ff; color: #7c3aed; }
 .badge-admin { background-color: #dbeafe; color: #2563eb; }
 .badge-cashier { background-color: var(--c-surface); color: var(--c-text-muted); }
+
+/* Audit action badges */
+.badge-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-update { background-color: #dbeafe; color: #2563eb; }
+.badge-create { background-color: #dcfce7; color: #15803d; }
+.badge-delete { background-color: #fee2e2; color: #dc2626; }
+.badge-toggle { background-color: #fef3c7; color: #d97706; }
+.text-nowrap { white-space: nowrap; }
 
 /* Dialog */
 .dialog-content {

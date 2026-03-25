@@ -30,7 +30,7 @@ const router = createRouter({
       path: '/products',
       name: 'products',
       component: () => import('@/pages/ProductsPage.vue'),
-      meta: { roles: ['admin'] },
+      meta: { roles: ['admin', 'cashier'] },
     },
     {
       path: '/dashboard',

@@ -13,6 +13,7 @@ import CategoryTabs from '@/components/pos/CategoryTabs.vue'
 import ProductGrid from '@/components/pos/ProductGrid.vue'
 import CartPanel from '@/components/pos/CartPanel.vue'
 import BarcodeScannerPopup from '@/components/pos/BarcodeScannerPopup.vue'
+import LinePayConfirmModal from '@/components/pos/LinePayConfirmModal.vue'
 
 const { categories } = useCategories()
 const { getActiveProducts, findByBarcode } = useProducts()
@@ -22,6 +23,8 @@ const { createOrder } = useOrders()
 const activeCategoryId = ref<string | null>(null)
 const showCartSheet = ref(false)
 const showCameraScanner = ref(false)
+const showLinePayConfirm = ref(false)
+const linePayPendingNote = ref('')
 const barcodeInput = ref('')
 const barcodeInputRef = ref<HTMLInputElement | null>(null)
 
@@ -106,6 +109,14 @@ function handleDecrement(productId: string) {
 }
 
 async function handleConfirmCheckout(paymentMethod: PaymentMethod, note: string) {
+  // LINE Pay: show confirmation modal instead of immediately creating order
+  if (paymentMethod === 'line_pay') {
+    linePayPendingNote.value = note
+    showCartSheet.value = false
+    showLinePayConfirm.value = true
+    return
+  }
+
   try {
     await createOrder(getItems(), totalAmount.value, paymentMethod, note)
     clearCart()
@@ -115,6 +126,24 @@ async function handleConfirmCheckout(paymentMethod: PaymentMethod, note: string)
     console.error('Checkout error:', e)
     showFailToast('結帳失敗: ' + (e?.message || '未知錯誤'))
   }
+}
+
+async function handleLinePayConfirmed() {
+  try {
+    await createOrder(getItems(), totalAmount.value, 'line_pay', linePayPendingNote.value)
+    clearCart()
+    showLinePayConfirm.value = false
+    showSuccessToast('LINE Pay 收款成功！')
+  } catch (e: any) {
+    console.error('LINE Pay checkout error:', e)
+    showFailToast('結帳失敗: ' + (e?.message || '未知錯誤'))
+  }
+}
+
+function handleLinePayCancelled() {
+  showLinePayConfirm.value = false
+  // Re-open cart sheet so cashier can change payment method
+  showCartSheet.value = true
 }
 
 // --- Barcode ---
@@ -287,6 +316,14 @@ function handleCameraScanned(code: string) {
       />
     </div>
   </div>
+
+  <!-- LINE Pay confirmation modal -->
+  <LinePayConfirmModal
+    v-model:show="showLinePayConfirm"
+    :total-amount="totalAmount"
+    @confirm="handleLinePayConfirmed"
+    @cancel="handleLinePayCancelled"
+  />
 
   <!-- Camera scanner popup (shared) -->
   <BarcodeScannerPopup

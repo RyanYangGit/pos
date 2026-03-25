@@ -7,6 +7,7 @@ import type { CategoryDoc } from '@/db/schemas/category'
 defineProps<{
   products: ProductDoc[]
   categories: CategoryDoc[]
+  canDelete?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -52,6 +53,7 @@ function getCategoryName(categoryId: string, categories: CategoryDoc[]): string 
           @click="emit('toggle', product.id)"
         />
         <van-button
+          v-if="canDelete !== false"
           square
           :text="LOCALE.deleteProduct"
           type="danger"

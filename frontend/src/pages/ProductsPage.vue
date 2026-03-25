@@ -1,15 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { showConfirmDialog, showSuccessToast, showFailToast } from 'vant'
 import { LOCALE } from '@/constants/locale'
 import { useCategories } from '@/composables/useCategories'
 import { useProducts } from '@/composables/useProducts'
+import { useAuth } from '@/composables/useAuth'
+import { authHeaders } from '@/utils/token'
 import type { ProductDoc } from '@/db/schemas/product'
 import ProductList from '@/components/product/ProductList.vue'
 import ProductForm from '@/components/product/ProductForm.vue'
 
+const { userRole } = useAuth()
+const isAdmin = computed(() => userRole.value === 'admin' || userRole.value === 'super_admin')
 const { categories, addCategory, updateCategory, deleteCategory } = useCategories()
 const { products, addProduct, updateProduct, deleteProduct, toggleProduct, importProducts } = useProducts()
+
+async function logProductChange(productId: string, productName: string, action: string, changes: Record<string, any>) {
+  try {
+    await fetch('/api/product-audit-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({
+        product_id: productId,
+        product_name: productName,
+        action,
+        changes: JSON.stringify(changes),
+      }),
+    })
+  } catch { /* offline */ }
+}
 
 // --- Excel Import ---
 interface ImportRow {
@@ -149,12 +168,26 @@ async function handleSaveProduct(data: {
   isActive: boolean; sortOrder: number;
 }) {
   if (editingProduct.value) {
+    const old = editingProduct.value
+    const changes: Record<string, { from: any; to: any }> = {}
+    if (data.price !== old.price) changes.price = { from: old.price, to: data.price }
+    if (data.stock !== old.stock) changes.stock = { from: old.stock, to: data.stock }
+    if (data.barcode !== old.barcode) changes.barcode = { from: old.barcode, to: data.barcode }
+    if (data.categoryId !== old.categoryId) changes.categoryId = { from: old.categoryId, to: data.categoryId }
+    if (data.isActive !== old.isActive) changes.isActive = { from: old.isActive, to: data.isActive }
+    if (data.name !== old.name) changes.name = { from: old.name, to: data.name }
+
     await updateProduct(editingProduct.value.id, data)
+
+    if (Object.keys(changes).length > 0) {
+      await logProductChange(old.id, old.name, 'update', changes)
+    }
   } else {
     await addProduct({
       ...data,
       sortOrder: products.value.length,
     })
+    await logProductChange('', data.name, 'create', { name: data.name, price: data.price })
   }
   showSuccessToast('已儲存')
 }
@@ -162,13 +195,23 @@ async function handleSaveProduct(data: {
 async function handleDeleteProduct(id: string) {
   try {
     await showConfirmDialog({ title: LOCALE.deleteConfirm })
+    const prod = products.value.find(p => p.id === id)
     await deleteProduct(id)
+    if (prod) {
+      await logProductChange(id, prod.name, 'delete', {})
+    }
     showSuccessToast('已刪除')
   } catch { /* cancelled */ }
 }
 
 async function handleToggleProduct(id: string) {
+  const prod = products.value.find(p => p.id === id)
   await toggleProduct(id)
+  if (prod) {
+    await logProductChange(id, prod.name, 'toggle', {
+      isActive: { from: prod.isActive, to: !prod.isActive },
+    })
+  }
 }
 
 async function handleAddCategory() {
@@ -192,7 +235,7 @@ async function handleDeleteCategory(id: string) {
     <van-tabs v-model:active="activeTab" sticky>
       <van-tab :title="LOCALE.tabProducts">
         <div class="p-3">
-          <div class="d-flex gap-2 mb-3">
+          <div v-if="isAdmin" class="d-flex gap-2 mb-3">
             <button
               class="flex-grow-1 btn-add-dashed"
               @click="handleAddProduct"
@@ -210,6 +253,7 @@ async function handleDeleteCategory(id: string) {
           <ProductList
             :products="products"
             :categories="categories"
+            :can-delete="isAdmin"
             @edit="handleEditProduct"
             @toggle="handleToggleProduct"
             @delete="handleDeleteProduct"
@@ -217,7 +261,7 @@ async function handleDeleteCategory(id: string) {
         </div>
       </van-tab>
 
-      <van-tab :title="LOCALE.categoryManage">
+      <van-tab v-if="isAdmin" :title="LOCALE.categoryManage">
         <div class="p-3 d-flex flex-column gap-3">
           <div class="d-flex gap-2">
             <van-field
@@ -251,6 +295,8 @@ async function handleDeleteCategory(id: string) {
       v-model:show="showProductForm"
       :categories="categories"
       :product="editingProduct"
+      :readonly-name="!isAdmin"
+      :can-delete="isAdmin"
       @save="handleSaveProduct"
       @delete="editingProduct && handleDeleteProduct(editingProduct.id).then(() => { showProductForm = false })"
     />
