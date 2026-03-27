@@ -246,6 +246,18 @@ async function handleToggleProduct(id: string) {
   }
 }
 
+async function downloadTemplate() {
+  const XLSX = await import('xlsx')
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['品名', '價格', '庫存', '條碼', '分類'],
+    ['範例商品', 100, 10, '4710000000001', '飲料'],
+  ])
+  ws['!cols'] = [{ wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 16 }, { wch: 12 }]
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, '商品匯入範本')
+  XLSX.writeFile(wb, '商品匯入範本.xlsx')
+}
+
 async function handleAddCategory() {
   if (!newCategoryName.value.trim()) return
   await addCategory(newCategoryName.value.trim())
@@ -280,6 +292,13 @@ async function handleDeleteCategory(id: string) {
             >
               <van-icon name="down" size="16" />
               匯入 Excel
+            </button>
+            <button
+              class="flex-shrink-0 btn-template-dashed d-flex align-items-center gap-1"
+              @click="downloadTemplate"
+            >
+              <van-icon name="description-o" size="16" />
+              範本
             </button>
           </div>
           <ProductList
@@ -462,6 +481,22 @@ async function handleDeleteCategory(id: string) {
 }
 .btn-import-dashed:active {
   background-color: #f0fdf4;
+}
+
+.btn-template-dashed {
+  height: 48px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  border: 2px dashed #60a5fa;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn-template-dashed:active {
+  background-color: #eff6ff;
 }
 
 .btn-accent {
