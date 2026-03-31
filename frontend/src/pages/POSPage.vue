@@ -29,6 +29,9 @@ const barcodeInput = ref('')
 const barcodeInputRef = ref<HTMLInputElement | null>(null)
 
 const filteredProducts = computed(() => getActiveProducts(activeCategoryId.value))
+const activeCategories = computed(() =>
+  categories.value.filter(cat => getActiveProducts(cat.id).length > 0)
+)
 
 // --- Bluetooth scanner: global keystroke capture ---
 let scanBuffer = ''
@@ -209,7 +212,7 @@ function handleCameraScanned(code: string) {
     </div>
 
     <CategoryTabs
-      :categories="categories"
+      :categories="activeCategories"
       :active-id="activeCategoryId"
       @select="activeCategoryId = $event"
     />
@@ -290,7 +293,7 @@ function handleCameraScanned(code: string) {
       </div>
 
       <CategoryTabs
-        :categories="categories"
+        :categories="activeCategories"
         :active-id="activeCategoryId"
         @select="activeCategoryId = $event"
       />
