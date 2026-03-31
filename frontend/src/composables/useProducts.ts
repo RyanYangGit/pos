@@ -124,7 +124,8 @@ export function useProducts() {
   }
 
   function findByBarcode(code: string): ProductDoc | undefined {
-    return products.value.find(p => p.barcode === code && p.isActive)
+    const normalized = code.replace(/^0+/, '')
+    return products.value.find(p => p.barcode && p.barcode.replace(/^0+/, '') === normalized && p.isActive)
   }
 
   async function importProducts(rows: Array<{
