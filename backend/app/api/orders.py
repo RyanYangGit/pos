@@ -115,3 +115,29 @@ async def cancel_order(
     await db.commit()
     await db.refresh(order)
     return _order_to_response(order)
+
+
+@router.delete("/{order_id}")
+async def delete_order(
+    order_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role not in ("admin", "super_admin"):
+        raise HTTPException(status_code=403, detail="權限不足")
+
+    result = await db.execute(
+        select(Order)
+        .where(Order.id == order_id)
+        .options(selectinload(Order.items))
+    )
+    order = result.scalars().first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="訂單不存在")
+    if current_user.role != "super_admin" and order.exhibition_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="權限不足")
+
+    await db.delete(order)
+    await db.commit()
+    return {"ok": True}

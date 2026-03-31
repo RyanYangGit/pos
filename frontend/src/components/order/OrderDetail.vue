@@ -8,14 +8,17 @@ import type { OrderDoc } from '@/db/schemas/order'
 defineProps<{
   show: boolean
   order: OrderDoc | null
+  canDelete?: boolean
 }>()
 
 const emit = defineEmits<{
   'update:show': [value: boolean]
   cancel: [orderId: string]
+  delete: [orderId: string]
 }>()
 
 const showConfirm = ref(false)
+const showDeleteConfirm = ref(false)
 </script>
 
 <template>
@@ -66,12 +69,28 @@ const showConfirm = ref(false)
       </div>
 
       <!-- Cancel button -->
-      <div v-if="!order.cancelledAt" class="mt-4">
+      <div v-if="!order.cancelledAt" class="mt-4 d-flex flex-column gap-2">
         <button
           class="btn btn-outline-danger w-100 cancel-btn"
           @click="showConfirm = true"
         >
           {{ LOCALE.cancelOrder }}
+        </button>
+        <button
+          v-if="canDelete"
+          class="btn w-100 delete-btn"
+          @click="showDeleteConfirm = true"
+        >
+          永久刪除訂單
+        </button>
+      </div>
+      <!-- Delete button for cancelled orders -->
+      <div v-if="order.cancelledAt && canDelete" class="mt-4">
+        <button
+          class="btn w-100 delete-btn"
+          @click="showDeleteConfirm = true"
+        >
+          永久刪除訂單
         </button>
       </div>
     </div>
@@ -87,6 +106,18 @@ const showConfirm = ref(false)
     :cancel-button-text="LOCALE.cancel"
     confirm-button-color="#dc3545"
     @confirm="order && emit('cancel', order.id)"
+  />
+
+  <!-- Delete confirm dialog -->
+  <van-dialog
+    v-model:show="showDeleteConfirm"
+    title="永久刪除"
+    message="確定要永久刪除此訂單嗎？此操作無法復原。"
+    show-cancel-button
+    confirm-button-text="永久刪除"
+    :cancel-button-text="LOCALE.cancel"
+    confirm-button-color="#dc3545"
+    @confirm="order && emit('delete', order.id)"
   />
 </template>
 
@@ -121,5 +152,19 @@ const showConfirm = ref(false)
   height: 44px;
   border-radius: var(--radius);
   font-weight: 600;
+}
+.delete-btn {
+  height: 44px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+  font-size: 0.875rem;
+}
+.delete-btn:hover,
+.delete-btn:active {
+  background-color: #b02a37;
+  color: #fff;
 }
 </style>

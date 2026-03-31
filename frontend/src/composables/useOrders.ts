@@ -213,5 +213,21 @@ export function useOrders() {
     }
   }
 
-  return { orders, createOrder, cancelOrder }
+  async function deleteOrder(orderId: string) {
+    const res = await fetch(`/api/orders/${orderId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: '刪除失敗' }))
+      throw new Error(err.detail || '刪除失敗')
+    }
+
+    // Remove from local DB
+    const db = getDatabase()
+    const doc = await db.orders.findOne(orderId).exec()
+    if (doc) await doc.remove()
+  }
+
+  return { orders, createOrder, cancelOrder, deleteOrder }
 }

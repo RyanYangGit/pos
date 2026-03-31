@@ -5,11 +5,14 @@ import { LOCALE } from '@/constants/locale'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/constants/payment'
 import { formatDate } from '@/utils/format'
 import { useOrders } from '@/composables/useOrders'
+import { useAuth } from '@/composables/useAuth'
 import type { OrderDoc } from '@/db/schemas/order'
 import OrderList from '@/components/order/OrderList.vue'
 import OrderDetail from '@/components/order/OrderDetail.vue'
 
-const { orders, cancelOrder } = useOrders()
+const { userRole } = useAuth()
+const isAdmin = computed(() => userRole.value === 'admin' || userRole.value === 'super_admin')
+const { orders, cancelOrder, deleteOrder } = useOrders()
 
 const selectedDate = ref<string>('')
 const selectedPayment = ref<string>('')
@@ -56,6 +59,16 @@ async function handleCancelOrder(orderId: string) {
     showSuccessToast(LOCALE.cancelSuccess)
   } catch (e: any) {
     showFailToast(e?.message || '取消失敗')
+  }
+}
+
+async function handleDeleteOrder(orderId: string) {
+  try {
+    await deleteOrder(orderId)
+    showDetail.value = false
+    showSuccessToast('訂單已永久刪除')
+  } catch (e: any) {
+    showFailToast(e?.message || '刪除失敗')
   }
 }
 </script>
@@ -112,7 +125,9 @@ async function handleCancelOrder(orderId: string) {
     <OrderDetail
       v-model:show="showDetail"
       :order="selectedOrder"
+      :can-delete="isAdmin"
       @cancel="handleCancelOrder"
+      @delete="handleDeleteOrder"
     />
   </div>
 </template>
