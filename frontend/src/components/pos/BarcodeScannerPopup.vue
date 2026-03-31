@@ -102,6 +102,9 @@ function onProcessed(result: any) {
 function onDetected(result: any) {
   if (!result?.codeResult?.code) return
 
+  // Cooldown after successful scan
+  if (Date.now() < lastDetectedAt) return
+
   const code = result.codeResult.code as string
   // Validate EAN-13 format
   if (!/^\d{13}$/.test(code)) return
@@ -132,8 +135,9 @@ function onDetected(result: any) {
     hintType.value = 'success'
     codeBuffer = []
     emit('scanned', code)
-    stopScanner()
-    emit('update:show', false)
+    // Cooldown: ignore scans for 1.5s to prevent duplicate
+    lastDetectedAt = Date.now() + 1500
+    setTimeout(resetHint, 1500)
   } else {
     hint.value = '辨識中，請保持不動...'
     hintType.value = 'info'

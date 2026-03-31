@@ -167,11 +167,8 @@ function handleBarcodeSubmit() {
 }
 
 function handleCameraScanned(code: string) {
-  // Delay so the popup fully closes before showing toast
-  setTimeout(() => {
-    barcodeInput.value = code
-    handleBarcodeSubmit()
-  }, 300)
+  barcodeInput.value = code
+  handleBarcodeSubmit()
 }
 </script>
 
