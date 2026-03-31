@@ -13,11 +13,20 @@ const { orders, cancelOrder } = useOrders()
 
 const selectedDate = ref<string>('')
 const selectedPayment = ref<string>('')
+const orderTab = ref<'completed' | 'cancelled' | 'all'>('completed')
 const showDetail = ref(false)
 const selectedOrder = ref<OrderDoc | null>(null)
 
 const filteredOrders = computed(() => {
   let result = orders.value
+
+  // Tab filter
+  if (orderTab.value === 'completed') {
+    result = result.filter(o => !o.cancelledAt)
+  } else if (orderTab.value === 'cancelled') {
+    result = result.filter(o => !!o.cancelledAt)
+  }
+
   if (selectedDate.value) {
     result = result.filter(o => formatDate(o.createdAt) === selectedDate.value)
   }
@@ -26,6 +35,9 @@ const filteredOrders = computed(() => {
   }
   return result
 })
+
+const completedCount = computed(() => orders.value.filter(o => !o.cancelledAt).length)
+const cancelledCount = computed(() => orders.value.filter(o => !!o.cancelledAt).length)
 
 const dateOptions = computed(() => {
   const dates = new Set(orders.value.map(o => formatDate(o.createdAt)))
@@ -52,6 +64,25 @@ async function handleCancelOrder(orderId: string) {
   <div class="orders-page d-flex flex-column bg-surface h-100">
     <div class="p-3">
       <h1 class="fs-5 fw-bold text-primary px-1 mb-2">{{ LOCALE.orderHistory }}</h1>
+
+      <!-- Order tabs -->
+      <div class="d-flex gap-1 mb-2 order-tab-group p-1 rounded">
+        <button
+          class="order-tab-btn"
+          :class="orderTab === 'completed' ? 'order-tab-btn--active' : ''"
+          @click="orderTab = 'completed'"
+        >成交 ({{ completedCount }})</button>
+        <button
+          class="order-tab-btn"
+          :class="orderTab === 'cancelled' ? 'order-tab-btn--active' : ''"
+          @click="orderTab = 'cancelled'"
+        >已取消 ({{ cancelledCount }})</button>
+        <button
+          class="order-tab-btn"
+          :class="orderTab === 'all' ? 'order-tab-btn--active' : ''"
+          @click="orderTab = 'all'"
+        >全部 ({{ orders.length }})</button>
+      </div>
 
       <!-- Filters -->
       <div class="d-flex gap-2 overflow-auto no-scrollbar">
@@ -118,4 +149,26 @@ async function handleCancelOrder(orderId: string) {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.order-tab-group {
+  background-color: var(--c-surface);
+  border-radius: var(--radius-sm);
+}
+.order-tab-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  min-height: 36px;
+}
+.order-tab-btn--active {
+  background-color: #fff;
+  color: var(--c-text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
 </style>
