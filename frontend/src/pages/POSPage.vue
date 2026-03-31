@@ -176,7 +176,7 @@ function handleCameraScanned(code: string) {
   <!-- iPhone Layout -->
   <div class="pos-mobile d-flex flex-column h-100 d-md-none">
     <!-- Barcode input bar -->
-    <div class="p-3 pb-1">
+    <div class="p-3 pb-1 flex-shrink-0">
       <div class="d-flex gap-2">
         <div class="flex-grow-1 position-relative">
           <input

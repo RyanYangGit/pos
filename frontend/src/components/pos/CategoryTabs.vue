@@ -13,7 +13,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="d-flex gap-2 overflow-auto px-3 py-2 no-scrollbar">
+  <div class="d-flex gap-2 overflow-auto px-3 py-2 no-scrollbar flex-shrink-0">
     <button
       class="btn flex-shrink-0 small fw-medium tab-btn"
       :class="activeId === null ? 'btn-active' : 'btn-inactive'"
