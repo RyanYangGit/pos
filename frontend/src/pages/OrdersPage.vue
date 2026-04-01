@@ -14,11 +14,14 @@ const { userRole } = useAuth()
 const isAdmin = computed(() => userRole.value === 'admin' || userRole.value === 'super_admin')
 const { orders, cancelOrder, deleteOrder } = useOrders()
 
-const selectedDate = ref<string>('')
+const today = formatDate(Date.now())
+const selectedDate = ref<string>(today)
 const selectedPayment = ref<string>('')
 const orderTab = ref<'completed' | 'cancelled' | 'all'>('completed')
 const showDetail = ref(false)
 const selectedOrder = ref<OrderDoc | null>(null)
+const page = ref(1)
+const PAGE_SIZE = 20
 
 const filteredOrders = computed(() => {
   let result = orders.value
@@ -38,6 +41,20 @@ const filteredOrders = computed(() => {
   }
   return result
 })
+
+const pagedOrders = computed(() => {
+  if (selectedDate.value) return filteredOrders.value // no pagination when date selected
+  return filteredOrders.value.slice(0, page.value * PAGE_SIZE)
+})
+
+const hasMore = computed(() => {
+  if (selectedDate.value) return false
+  return page.value * PAGE_SIZE < filteredOrders.value.length
+})
+
+function loadMore() {
+  page.value++
+}
 
 const completedCount = computed(() => orders.value.filter(o => !o.cancelledAt).length)
 const cancelledCount = computed(() => orders.value.filter(o => !!o.cancelledAt).length)
@@ -83,17 +100,17 @@ async function handleDeleteOrder(orderId: string) {
         <button
           class="order-tab-btn"
           :class="orderTab === 'completed' ? 'order-tab-btn--active' : ''"
-          @click="orderTab = 'completed'"
+          @click="orderTab = 'completed'; page = 1"
         >成交 ({{ completedCount }})</button>
         <button
           class="order-tab-btn"
           :class="orderTab === 'cancelled' ? 'order-tab-btn--active' : ''"
-          @click="orderTab = 'cancelled'"
+          @click="orderTab = 'cancelled'; page = 1"
         >已取消 ({{ cancelledCount }})</button>
         <button
           class="order-tab-btn"
           :class="orderTab === 'all' ? 'order-tab-btn--active' : ''"
-          @click="orderTab = 'all'"
+          @click="orderTab = 'all'; page = 1"
         >全部 ({{ orders.length }})</button>
       </div>
 
@@ -102,13 +119,16 @@ async function handleDeleteOrder(orderId: string) {
         <select
           v-model="selectedDate"
           class="form-select form-select-sm filter-select"
+          @change="page = 1"
         >
-          <option value="">{{ LOCALE.filterByDate }}</option>
+          <option :value="today">今天</option>
           <option v-for="d in dateOptions" :key="d" :value="d">{{ d }}</option>
+          <option value="">全部日期</option>
         </select>
         <select
           v-model="selectedPayment"
           class="form-select form-select-sm filter-select"
+          @change="page = 1"
         >
           <option value="">{{ LOCALE.filterByPayment }}</option>
           <option v-for="m in PAYMENT_METHODS" :key="m.value" :value="m.value">
@@ -119,7 +139,13 @@ async function handleDeleteOrder(orderId: string) {
     </div>
 
     <div class="flex-grow-1 overflow-auto px-3 pb-3">
-      <OrderList :orders="filteredOrders" @select="handleSelectOrder" />
+      <div class="small text-muted mb-2 px-1">{{ filteredOrders.length }} 筆訂單</div>
+      <OrderList :orders="pagedOrders" @select="handleSelectOrder" />
+      <div v-if="hasMore" class="text-center py-3">
+        <button class="btn-load-more" @click="loadMore">
+          載入更多 ({{ pagedOrders.length }}/{{ filteredOrders.length }})
+        </button>
+      </div>
     </div>
 
     <OrderDetail
@@ -185,5 +211,20 @@ async function handleDeleteOrder(orderId: string) {
   background-color: #fff;
   color: var(--c-text);
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-load-more {
+  padding: 8px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  min-height: 44px;
+}
+.btn-load-more:active {
+  background-color: var(--c-surface);
 }
 </style>
