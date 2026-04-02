@@ -234,7 +234,7 @@ function handleCameraScanned(code: string) {
             ref="barcodeInputRef"
             v-model="barcodeInput"
             type="text"
-            inputmode="none"
+            inputmode="numeric"
             :placeholder="LOCALE.barcodePlaceholder"
             class="form-control barcode-input"
             @keydown.enter="handleBarcodeSubmit"
@@ -314,7 +314,7 @@ function handleCameraScanned(code: string) {
             <input
               v-model="barcodeInput"
               type="text"
-              inputmode="none"
+              inputmode="numeric"
               :placeholder="LOCALE.barcodePlaceholder"
               class="form-control barcode-input"
               @keydown.enter="handleBarcodeSubmit"
