@@ -21,6 +21,9 @@ const emit = defineEmits<{
     <span class="small text-center product-name">
       {{ product.name }}
     </span>
+    <span v-if="product.barcode" class="product-barcode mt-1">
+      {{ product.barcode.slice(-3) }}
+    </span>
     <span class="fw-bold mt-1 product-price">
       {{ formatCurrency(product.price) }}
     </span>
@@ -59,6 +62,12 @@ const emit = defineEmits<{
   .product-price {
     font-size: 1.25rem;
   }
+}
+.product-barcode {
+  font-size: 0.625rem;
+  color: var(--c-text-muted);
+  font-family: monospace;
+  letter-spacing: 0.05em;
 }
 .product-price {
   color: var(--c-accent);
