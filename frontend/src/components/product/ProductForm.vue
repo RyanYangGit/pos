@@ -38,9 +38,6 @@ const stock = ref('')
 const barcode = ref('')
 const categoryId = ref('')
 const isActive = ref(true)
-const showKeyboard = ref(false)
-const activeField = ref<'price' | 'stock'>('price')
-
 const isEditing = computed(() => !!props.product)
 const title = computed(() => isEditing.value ? LOCALE.editProduct : LOCALE.addProduct)
 
@@ -60,17 +57,7 @@ watch(() => props.show, (val) => {
     categoryId.value = props.categories[0]?.id || ''
     isActive.value = true
   }
-  showKeyboard.value = false
 })
-
-function handleKeyInput(key: string) {
-  const field = activeField.value === 'price' ? price : stock
-  if (key === 'delete') {
-    field.value = field.value.slice(0, -1)
-  } else {
-    field.value += key
-  }
-}
 
 function handleSave() {
   if (!name.value.trim() || !price.value) return
@@ -88,7 +75,6 @@ function handleSave() {
 }
 
 function handleClose() {
-  showKeyboard.value = false
   emit('update:show', false)
 }
 </script>
@@ -134,16 +120,16 @@ function handleClose() {
           :label="LOCALE.productPrice"
           placeholder="0"
           required
-          readonly
-          @click="activeField = 'price'; showKeyboard = true"
+          type="number"
+          inputmode="numeric"
         />
 
         <van-field
           v-model="stock"
           :label="LOCALE.productStock"
           :placeholder="LOCALE.productStockUnlimited"
-          readonly
-          @click="activeField = 'stock'; showKeyboard = true"
+          type="number"
+          inputmode="numeric"
         />
 
         <van-field
@@ -178,15 +164,6 @@ function handleClose() {
       </div>
     </div>
 
-    <van-number-keyboard
-      :show="showKeyboard"
-      theme="custom"
-      :extra-key="'.'"
-      :close-button-text="'完成'"
-      @blur="showKeyboard = false"
-      @input="handleKeyInput"
-      @delete="handleKeyInput('delete')"
-    />
   </van-popup>
 </template>
 
