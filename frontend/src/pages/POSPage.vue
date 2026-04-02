@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { showSuccessToast, showFailToast } from 'vant'
 import { LOCALE } from '@/constants/locale'
 import { formatCurrency } from '@/utils/format'
@@ -188,6 +188,28 @@ function handleBarcodeSubmit() {
   barcodeInput.value = ''
   nextTick(() => barcodeInputRef.value?.focus())
 }
+
+// Auto-trigger when exactly 3 digits typed (not from scanner)
+let suffixTimeout: ReturnType<typeof setTimeout> | null = null
+watch(barcodeInput, (val) => {
+  if (suffixTimeout) clearTimeout(suffixTimeout)
+  const trimmed = val.trim()
+  if (/^\d{3}$/.test(trimmed)) {
+    // Small delay to distinguish from scanner burst
+    suffixTimeout = setTimeout(() => {
+      const matches = findByBarcodeSuffix(trimmed)
+      if (matches.length === 1) {
+        addItem(matches[0])
+        showSuccessToast(`${matches[0].name} ${LOCALE.barcodeAdded}`)
+        barcodeInput.value = ''
+      } else if (matches.length > 1) {
+        suffixMatches.value = matches
+        showSuffixPicker.value = true
+        barcodeInput.value = ''
+      }
+    }, 300)
+  }
+})
 
 function handleSuffixSelect(product: ProductDoc) {
   addItem(product)
