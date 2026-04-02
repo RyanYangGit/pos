@@ -12,7 +12,7 @@ const { isSuperAdmin } = useAuth()
 const { syncEnabled, toggleSync } = useSync()
 
 // --- Tabs ---
-type Tab = 'users' | 'companies' | 'shop' | 'data' | 'audit'
+type Tab = 'users' | 'companies' | 'shop' | 'data' | 'audit' | 'cash'
 const activeTab = ref<Tab>('users')
 
 // --- Shop settings ---
@@ -214,6 +214,51 @@ async function handleDeleteUser(id: string) {
   } catch { /* cancelled */ }
 }
 
+// --- Cash Counts ---
+interface CashCountItem {
+  id: string
+  user_display_name: string
+  bill_1000: number
+  bill_500: number
+  bill_100: number
+  coin_50: number
+  coin_10: number
+  coin_5: number
+  coin_1: number
+  total: number
+  note: string | null
+  created_at: string
+}
+const cashCounts = ref<CashCountItem[]>([])
+
+async function loadCashCounts() {
+  try {
+    const res = await fetch('/api/cash-counts?limit=100', { headers: authHeaders() })
+    if (res.ok) cashCounts.value = await res.json()
+  } catch { /* offline */ }
+}
+
+function formatCashTime(isoStr: string): string {
+  const d = new Date(isoStr)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  return `${mm}/${dd} ${hh}:${mi}`
+}
+
+function formatCashBreakdown(c: CashCountItem): string {
+  const parts: string[] = []
+  if (c.bill_1000) parts.push(`$1000×${c.bill_1000}`)
+  if (c.bill_500) parts.push(`$500×${c.bill_500}`)
+  if (c.bill_100) parts.push(`$100×${c.bill_100}`)
+  if (c.coin_50) parts.push(`$50×${c.coin_50}`)
+  if (c.coin_10) parts.push(`$10×${c.coin_10}`)
+  if (c.coin_5) parts.push(`$5×${c.coin_5}`)
+  if (c.coin_1) parts.push(`$1×${c.coin_1}`)
+  return parts.join('、')
+}
+
 // --- Audit Logs ---
 interface AuditLogItem {
   id: string
@@ -309,6 +354,11 @@ onMounted(async () => {
           :class="activeTab === 'audit' ? 'tab-btn--active' : ''"
           @click="activeTab = 'audit'; loadAuditLogs()"
         >修改紀錄</button>
+        <button
+          class="tab-btn"
+          :class="activeTab === 'cash' ? 'tab-btn--active' : ''"
+          @click="activeTab = 'cash'; loadCashCounts()"
+        >點鈔紀錄</button>
       </div>
     </div>
 
@@ -457,6 +507,41 @@ onMounted(async () => {
             <button class="btn-danger-outline" @click="handleClearData">清除所有資料</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Cash Counts Tab -->
+    <div v-else-if="activeTab === 'cash'" class="flex-grow-1 overflow-auto px-4 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="small fw-semibold text-muted mb-0">點鈔紀錄</h2>
+        <button class="btn-outline d-flex align-items-center gap-1" @click="loadCashCounts">
+          <van-icon name="replay" size="14" />重新載入
+        </button>
+      </div>
+      <div class="bg-white rounded border overflow-hidden">
+        <table class="table table-sm mb-0 admin-table">
+          <thead>
+            <tr>
+              <th class="text-start">時間</th>
+              <th class="text-start">人員</th>
+              <th class="text-end">合計</th>
+              <th class="text-start">明細</th>
+              <th class="text-start">備註</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="cashCounts.length === 0">
+              <td colspan="5" class="text-center py-5 text-muted">尚無紀錄</td>
+            </tr>
+            <tr v-for="c in cashCounts" :key="c.id">
+              <td class="text-muted extra-small text-nowrap">{{ formatCashTime(c.created_at) }}</td>
+              <td class="fw-medium text-primary text-nowrap">{{ c.user_display_name }}</td>
+              <td class="text-end fw-bold text-nowrap">NT${{ c.total.toLocaleString() }}</td>
+              <td class="text-muted extra-small">{{ formatCashBreakdown(c) }}</td>
+              <td class="text-muted extra-small">{{ c.note || '' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

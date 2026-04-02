@@ -14,6 +14,7 @@ import ProductGrid from '@/components/pos/ProductGrid.vue'
 import CartPanel from '@/components/pos/CartPanel.vue'
 import BarcodeScannerPopup from '@/components/pos/BarcodeScannerPopup.vue'
 import LinePayConfirmModal from '@/components/pos/LinePayConfirmModal.vue'
+import CashCountPopup from '@/components/pos/CashCountPopup.vue'
 
 const { categories } = useCategories()
 const { getActiveProducts, findByBarcode, findByBarcodeSuffix } = useProducts()
@@ -24,6 +25,7 @@ const activeCategoryId = ref<string | null>(null)
 const showCartSheet = ref(false)
 const showCameraScanner = ref(false)
 const showLinePayConfirm = ref(false)
+const showCashCount = ref(false)
 const linePayPendingNote = ref('')
 const barcodeInput = ref('')
 const barcodeInputRef = ref<HTMLInputElement | null>(null)
@@ -253,6 +255,12 @@ function handleCameraScanned(code: string) {
         >
           <van-icon name="scan" size="18" />
         </button>
+        <button
+          class="btn d-flex align-items-center gap-1 flex-shrink-0 cash-btn"
+          @click="showCashCount = true"
+        >
+          💰
+        </button>
       </div>
       <div v-if="scannerConnected" class="scanner-status mt-1">
         <span class="scanner-dot" />條碼機已連線
@@ -334,6 +342,12 @@ function handleCameraScanned(code: string) {
             <van-icon name="scan" size="18" />
             {{ LOCALE.openCamera }}
           </button>
+          <button
+            class="btn d-flex align-items-center gap-1 flex-shrink-0 cash-btn fw-bold"
+            @click="showCashCount = true"
+          >
+            💰 點鈔
+          </button>
         </div>
         <div v-if="scannerConnected" class="scanner-status mt-1">
           <span class="scanner-dot" />條碼機已連線
@@ -372,6 +386,9 @@ function handleCameraScanned(code: string) {
     @confirm="handleLinePayConfirmed"
     @cancel="handleLinePayCancelled"
   />
+
+  <!-- Cash count popup -->
+  <CashCountPopup v-model:show="showCashCount" />
 
   <!-- Suffix match picker -->
   <van-popup
@@ -447,6 +464,21 @@ function handleCameraScanned(code: string) {
   background-color: var(--c-primary);
   border-color: var(--c-primary);
   color: #fff;
+}
+.cash-btn {
+  height: 44px;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  border-radius: var(--radius);
+  background-color: #fff;
+  border: 1px solid var(--c-border);
+  color: var(--c-text);
+  font-size: 0.875rem;
+  min-height: 44px;
+}
+.cash-btn:hover,
+.cash-btn:active {
+  background-color: var(--c-surface, #f5f5f5);
 }
 .cart-summary-bar {
   background-color: var(--c-primary);
