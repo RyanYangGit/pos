@@ -16,7 +16,7 @@ import BarcodeScannerPopup from '@/components/pos/BarcodeScannerPopup.vue'
 import LinePayConfirmModal from '@/components/pos/LinePayConfirmModal.vue'
 
 const { categories } = useCategories()
-const { getActiveProducts, findByBarcode } = useProducts()
+const { getActiveProducts, findByBarcode, findByBarcodeSuffix } = useProducts()
 const { items, totalItems, totalAmount, addItem, updateQuantity, removeItem, clearCart, getItems } = useCart()
 const { createOrder } = useOrders()
 
@@ -27,6 +27,8 @@ const showLinePayConfirm = ref(false)
 const linePayPendingNote = ref('')
 const barcodeInput = ref('')
 const barcodeInputRef = ref<HTMLInputElement | null>(null)
+const showSuffixPicker = ref(false)
+const suffixMatches = ref<ProductDoc[]>([])
 
 const filteredProducts = computed(() => getActiveProducts(activeCategoryId.value))
 const activeCategories = computed(() =>
@@ -155,18 +157,42 @@ function handleBarcodeSubmit() {
   const code = barcodeInput.value.trim()
   if (!code) return
 
+  // Full barcode match first
   const product = findByBarcode(code)
   if (product) {
     addItem(product)
     showSuccessToast(`${product.name} ${LOCALE.barcodeAdded}`)
-  } else {
-    showFailToast(`${LOCALE.barcodeNotFound}\n條碼: ${code}`)
+    barcodeInput.value = ''
+    nextTick(() => barcodeInputRef.value?.focus())
+    return
   }
 
+  // Short code (2-5 digits): search by suffix
+  if (/^\d{2,5}$/.test(code)) {
+    const matches = findByBarcodeSuffix(code)
+    if (matches.length === 1) {
+      addItem(matches[0])
+      showSuccessToast(`${matches[0].name} ${LOCALE.barcodeAdded}`)
+    } else if (matches.length > 1) {
+      suffixMatches.value = matches
+      showSuffixPicker.value = true
+    } else {
+      showFailToast(`${LOCALE.barcodeNotFound}\n後碼: ${code}`)
+    }
+    barcodeInput.value = ''
+    nextTick(() => barcodeInputRef.value?.focus())
+    return
+  }
+
+  showFailToast(`${LOCALE.barcodeNotFound}\n條碼: ${code}`)
   barcodeInput.value = ''
-  nextTick(() => {
-    barcodeInputRef.value?.focus()
-  })
+  nextTick(() => barcodeInputRef.value?.focus())
+}
+
+function handleSuffixSelect(product: ProductDoc) {
+  addItem(product)
+  showSuffixPicker.value = false
+  showSuccessToast(`${product.name} ${LOCALE.barcodeAdded}`)
 }
 
 function handleCameraScanned(code: string) {
@@ -325,6 +351,34 @@ function handleCameraScanned(code: string) {
     @cancel="handleLinePayCancelled"
   />
 
+  <!-- Suffix match picker -->
+  <van-popup
+    v-model:show="showSuffixPicker"
+    round
+    closeable
+    position="bottom"
+    :duration="0"
+    :style="{ maxHeight: '60%' }"
+  >
+    <div class="px-3 pt-5 pb-4">
+      <h2 class="fw-bold text-center mb-3 suffix-title">選擇商品</h2>
+      <div class="d-flex flex-column gap-2">
+        <div
+          v-for="p in suffixMatches"
+          :key="p.id"
+          class="d-flex align-items-center gap-3 px-3 py-3 bg-white rounded suffix-item"
+          @click="handleSuffixSelect(p)"
+        >
+          <div class="flex-grow-1">
+            <div class="small fw-medium">{{ p.name }}</div>
+            <div class="extra-small text-muted">{{ p.barcode }}</div>
+          </div>
+          <div class="fw-bold">NT${{ p.price }}</div>
+        </div>
+      </div>
+    </div>
+  </van-popup>
+
   <!-- Camera scanner popup (shared) -->
   <BarcodeScannerPopup
     v-model:show="showCameraScanner"
@@ -401,5 +455,23 @@ function handleCameraScanned(code: string) {
 @keyframes dot-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+.suffix-title {
+  font-size: 1.125rem;
+  color: var(--c-text);
+}
+.suffix-item {
+  cursor: pointer;
+  border: 1px solid var(--c-border);
+  min-height: 44px;
+}
+.suffix-item:active {
+  background-color: var(--c-surface, #f5f5f5) !important;
+}
+.extra-small {
+  font-size: 0.75rem;
+}
+.text-muted {
+  color: var(--c-text-muted, #6c757d);
 }
 </style>

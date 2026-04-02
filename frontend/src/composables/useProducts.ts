@@ -128,6 +128,10 @@ export function useProducts() {
     return products.value.find(p => p.barcode && p.barcode.replace(/^0+/, '') === normalized && p.isActive)
   }
 
+  function findByBarcodeSuffix(suffix: string): ProductDoc[] {
+    return products.value.filter(p => p.barcode && p.barcode.endsWith(suffix) && p.isActive)
+  }
+
   async function importProducts(rows: Array<{
     name: string; price: number; stock: number | null
     barcode: string | null; categoryId: string
@@ -158,5 +162,5 @@ export function useProducts() {
     return { created, updated }
   }
 
-  return { products, loadProducts: pullFromServer, getActiveProducts, findByBarcode, addProduct, updateProduct, deleteProduct, toggleProduct, importProducts }
+  return { products, loadProducts: pullFromServer, getActiveProducts, findByBarcode, findByBarcodeSuffix, addProduct, updateProduct, deleteProduct, toggleProduct, importProducts }
 }
