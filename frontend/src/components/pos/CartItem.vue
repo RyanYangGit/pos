@@ -16,7 +16,7 @@ const emit = defineEmits<{
 <template>
   <div class="d-flex align-items-center gap-3 py-3 border-bottom cart-item-row">
     <div class="flex-grow-1 min-width-0">
-      <div class="fw-medium small text-truncate item-name">{{ item.productName }}</div>
+      <div class="fw-medium small item-name">{{ item.productName }}</div>
       <div class="item-unit-price mt-1">{{ formatCurrency(item.unitPrice) }}</div>
     </div>
     <div class="d-flex align-items-center gap-2">
