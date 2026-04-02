@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { LOCALE } from '@/constants/locale'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/constants/payment'
 import type { CartItem as CartItemType } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/format'
 import CartItem from './CartItem.vue'
 
-defineProps<{
+const props = defineProps<{
   items: CartItemType[]
   totalItems: number
   totalAmount: number
 }>()
+
+const cartScrollRef = ref<HTMLDivElement | null>(null)
+
+watch(() => props.items.length, () => {
+  nextTick(() => {
+    if (cartScrollRef.value) {
+      cartScrollRef.value.scrollTop = cartScrollRef.value.scrollHeight
+    }
+  })
+})
 
 const emit = defineEmits<{
   increment: [productId: string]
@@ -52,7 +62,7 @@ async function handleConfirm() {
     </div>
 
     <!-- Items -->
-    <div class="flex-grow-1 overflow-auto px-3">
+    <div ref="cartScrollRef" class="flex-grow-1 overflow-auto px-3">
       <div v-if="items.length === 0" class="d-flex align-items-center justify-content-center h-100 small empty-text">
         {{ LOCALE.cartEmpty }}
       </div>
