@@ -183,6 +183,18 @@ const editingProduct = ref<ProductDoc | null>(null)
 const showCategoryDialog = ref(false)
 const newCategoryName = ref('')
 const activeTab = ref(0)
+const sortByStock = ref(false)
+
+const sortedProducts = computed(() => {
+  if (!sortByStock.value) return products.value
+  return [...products.value].sort((a, b) => {
+    // null stock (unlimited) goes to bottom
+    if (a.stock === null && b.stock === null) return 0
+    if (a.stock === null) return 1
+    if (b.stock === null) return -1
+    return a.stock - b.stock
+  })
+})
 
 function handleAddProduct() {
   editingProduct.value = null
@@ -301,8 +313,18 @@ async function handleDeleteCategory(id: string) {
               範本
             </button>
           </div>
+          <div class="d-flex mb-3">
+            <button
+              class="btn-sort d-flex align-items-center gap-1"
+              :class="sortByStock ? 'btn-sort--active' : ''"
+              @click="sortByStock = !sortByStock"
+            >
+              <van-icon name="sort" size="14" />
+              庫存少→多
+            </button>
+          </div>
           <ProductList
-            :products="products"
+            :products="sortedProducts"
             :categories="categories"
             :can-delete="isAdmin"
             @edit="handleEditProduct"
@@ -513,6 +535,23 @@ async function handleDeleteCategory(id: string) {
 }
 .btn-accent:disabled {
   background-color: var(--c-border);
+}
+
+.btn-sort {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border);
+  background: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  min-height: 36px;
+}
+.btn-sort--active {
+  border-color: var(--c-accent);
+  background-color: #fef2f2;
+  color: var(--c-accent);
 }
 
 .btn-icon-delete {
