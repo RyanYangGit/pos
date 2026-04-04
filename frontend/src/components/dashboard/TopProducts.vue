@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { LOCALE } from '@/constants/locale'
 import { formatCurrency } from '@/utils/format'
 
-defineProps<{
+const PAGE_SIZE = 5
+
+const props = defineProps<{
   products: { name: string; quantity: number; revenue: number }[]
 }>()
+
+const expanded = ref(false)
+
+const visibleProducts = computed(() =>
+  expanded.value ? props.products : props.products.slice(0, PAGE_SIZE)
+)
+
+const hasMore = computed(() => props.products.length > PAGE_SIZE)
 </script>
 
 <template>
@@ -13,7 +24,7 @@ defineProps<{
     <div v-if="products.length === 0" class="text-center py-3 text-muted small">{{ LOCALE.noData }}</div>
     <div v-else class="d-flex flex-column gap-2">
       <div
-        v-for="(product, idx) in products"
+        v-for="(product, idx) in visibleProducts"
         :key="product.name"
         class="d-flex align-items-center gap-3"
       >
@@ -24,6 +35,13 @@ defineProps<{
         <span class="extra-small text-muted flex-shrink-0">{{ product.quantity }}件</span>
         <span class="small fw-medium text-primary flex-shrink-0 num">{{ formatCurrency(product.revenue) }}</span>
       </div>
+      <button
+        v-if="hasMore"
+        class="btn-more extra-small text-muted mt-1"
+        @click="expanded = !expanded"
+      >
+        {{ expanded ? '收起' : `顯示更多 (共${products.length}項)` }}
+      </button>
     </div>
   </div>
 </template>
@@ -58,5 +76,17 @@ defineProps<{
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--c-text-muted);
+}
+
+.btn-more {
+  background: none;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 0;
+  cursor: pointer;
+  min-height: 36px;
+}
+.btn-more:active {
+  background-color: var(--c-surface);
 }
 </style>
