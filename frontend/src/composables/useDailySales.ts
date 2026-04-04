@@ -81,7 +81,7 @@ export function useDailySales() {
       }
     }
     return Object.values(map)
-      .sort((a, b) => b.revenue - a.revenue)
+      .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 50)
   })
 
