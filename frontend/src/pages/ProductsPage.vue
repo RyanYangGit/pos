@@ -287,7 +287,7 @@ async function handleDeleteCategory(id: string) {
 </script>
 
 <template>
-  <div class="products-page d-flex flex-column bg-surface h-100">
+  <div class="products-page d-flex flex-column bg-surface min-h-100">
     <van-tabs v-model:active="activeTab" sticky>
       <van-tab :title="LOCALE.tabProducts">
         <div class="p-3">
@@ -463,7 +463,7 @@ async function handleDeleteCategory(id: string) {
   --radius: 10px;
   --radius-sm: 6px;
 }
-.h-100 { height: 100%; }
+.min-h-100 { min-height: 100%; }
 .bg-surface { background-color: var(--c-surface); }
 .bg-white { background-color: #fff; }
 .text-primary { color: var(--c-text) !important; }
