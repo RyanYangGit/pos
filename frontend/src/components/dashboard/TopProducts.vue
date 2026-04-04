@@ -20,7 +20,7 @@ defineProps<{
         <span class="rank-badge flex-shrink-0">
           {{ idx + 1 }}
         </span>
-        <span class="flex-grow-1 small text-primary text-truncate">{{ product.name }}</span>
+        <span class="flex-grow-1 small text-primary">{{ product.name }}</span>
         <span class="extra-small text-muted flex-shrink-0">{{ product.quantity }}件</span>
         <span class="small fw-medium text-primary flex-shrink-0 num">{{ formatCurrency(product.revenue) }}</span>
       </div>
