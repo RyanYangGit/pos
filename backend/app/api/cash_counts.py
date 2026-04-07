@@ -1,4 +1,5 @@
 import uuid
+from datetime import date, datetime, time
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -78,13 +79,20 @@ async def create_cash_count(
 @router.get("", response_model=list[CashCountResponse])
 async def list_cash_counts(
     limit: int = Query(default=50, le=200),
+    start_date: Optional[date] = Query(default=None),
+    end_date: Optional[date] = Query(default=None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     cid = current_user.company_id
     query = select(CashCount).where(
         CashCount.company_id == cid
-    ).order_by(CashCount.created_at.desc()).limit(limit)
+    )
+    if start_date:
+        query = query.where(CashCount.created_at >= datetime.combine(start_date, time.min))
+    if end_date:
+        query = query.where(CashCount.created_at <= datetime.combine(end_date, time.max))
+    query = query.order_by(CashCount.created_at.desc()).limit(limit)
 
     result = await db.execute(query)
     rows = result.scalars().all()

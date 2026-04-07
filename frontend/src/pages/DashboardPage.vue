@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { LOCALE } from '@/constants/locale'
 import { useDailySales } from '@/composables/useDailySales'
+import { authHeaders } from '@/utils/token'
 import DailySummary from '@/components/dashboard/DailySummary.vue'
 import PaymentBreakdown from '@/components/dashboard/PaymentBreakdown.vue'
 import TopProducts from '@/components/dashboard/TopProducts.vue'
+import CashCountList from '@/components/dashboard/CashCountList.vue'
+import type { CashCountItem } from '@/components/dashboard/CashCountList.vue'
 
 const {
   startDate,
@@ -15,6 +18,30 @@ const {
   paymentBreakdown,
   topProducts,
 } = useDailySales()
+
+// --- Cash Counts ---
+const cashCounts = ref<CashCountItem[]>([])
+
+function formatDateParam(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dd}`
+}
+
+async function loadCashCounts() {
+  try {
+    const params = new URLSearchParams({
+      limit: '200',
+      start_date: formatDateParam(startDate.value),
+      end_date: formatDateParam(endDate.value),
+    })
+    const res = await fetch(`/api/cash-counts?${params}`, { headers: authHeaders() })
+    if (res.ok) cashCounts.value = await res.json()
+  } catch { /* offline */ }
+}
+
+watch([startDate, endDate], () => loadCashCounts(), { immediate: true })
 
 // Date picker state
 const showDatePicker = ref(false)
@@ -153,6 +180,8 @@ const maxDate = new Date()
       <PaymentBreakdown :data="paymentBreakdown" />
 
       <TopProducts :products="topProducts" />
+
+      <CashCountList :items="cashCounts" />
     </div>
 
     <!-- Date picker popup -->
