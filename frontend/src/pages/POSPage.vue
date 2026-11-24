@@ -9,6 +9,7 @@ import { useCategories } from '@/composables/useCategories'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useOrders } from '@/composables/useOrders'
+import { useVendors } from '@/composables/useVendors'
 import CategoryTabs from '@/components/pos/CategoryTabs.vue'
 import ProductGrid from '@/components/pos/ProductGrid.vue'
 import CartPanel from '@/components/pos/CartPanel.vue'
@@ -20,6 +21,7 @@ const { categories } = useCategories()
 const { getActiveProducts, findByBarcode, findByBarcodeSuffix } = useProducts()
 const { items, totalItems, totalAmount, addItem, updateQuantity, removeItem, clearCart, getItems } = useCart()
 const { createOrder } = useOrders()
+useVendors() // keep a local vendor list so offline sales still record vendor names
 
 const activeCategoryId = ref<string | null>(null)
 const showCartSheet = ref(false)

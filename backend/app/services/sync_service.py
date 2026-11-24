@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.category import Category
 from app.models.product import Product
 from app.models.order import Order, OrderItem
+from app.models.vendor import Vendor
 from app.schemas.sync import PullCheckpoint
 
 
@@ -108,6 +109,7 @@ async def pull_products(
         {
             "id": r.id,
             "categoryId": r.category_id,
+            "vendorId": r.vendor_id,
             "name": r.name,
             "price": r.price,
             "stock": r.stock,
@@ -193,16 +195,46 @@ async def push_orders(
         db.add(new_order)
 
         for item in doc.get("items", []):
+            product_id = item.get("productId", item.get("product_id", ""))
+            vendor_id, vendor_name = await _resolve_item_vendor(
+                db, exhibition_id, product_id, item.get("vendorId"), item.get("vendorName"),
+            )
             new_item = OrderItem(
                 id=str(uuid.uuid4()),
                 order_id=doc["id"],
-                product_id=item.get("productId", item.get("product_id", "")),
+                product_id=product_id,
                 product_name=item.get("productName", item.get("product_name", "")),
                 unit_price=item.get("unitPrice", item.get("unit_price", 0)),
                 quantity=item.get("quantity", 0),
                 subtotal=item.get("subtotal", 0),
+                vendor_id=vendor_id,
+                vendor_name=vendor_name,
             )
             db.add(new_item)
 
     await db.commit()
     return conflicts
+
+
+async def _resolve_item_vendor(
+    db: AsyncSession,
+    company_id: str,
+    product_id: str,
+    client_vendor_id: str | None,
+    client_vendor_name: str | None,
+) -> tuple[str | None, str | None]:
+    """Vendor snapshot for a sold item.
+
+    Prefer what the device recorded at checkout (it may have sold offline before a product was
+    moved to another vendor); fall back to the product's current vendor for older app versions.
+    """
+    if client_vendor_id:
+        vendor = await db.get(Vendor, client_vendor_id)
+        if vendor and vendor.company_id == company_id:
+            return vendor.id, client_vendor_name or vendor.name
+    product = await db.get(Product, product_id) if product_id else None
+    if product and product.exhibition_id == company_id and product.vendor_id:
+        vendor = await db.get(Vendor, product.vendor_id)
+        if vendor:
+            return vendor.id, vendor.name
+    return None, None

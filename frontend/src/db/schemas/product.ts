@@ -3,6 +3,7 @@ import type { RxJsonSchema } from 'rxdb'
 export interface ProductDoc {
   id: string
   categoryId: string
+  vendorId?: string | null
   name: string
   price: number
   stock: number | null
@@ -21,6 +22,7 @@ export const productSchema: RxJsonSchema<ProductDoc> = {
   properties: {
     id: { type: 'string', maxLength: 36 },
     categoryId: { type: 'string', maxLength: 36 },
+    vendorId: { type: ['string', 'null'] },
     name: { type: 'string' },
     price: { type: 'number', multipleOf: 1, minimum: 0, maximum: 9999999 },
     stock: { type: ['number', 'null'] },

@@ -7,11 +7,13 @@ interface ProductLike {
   id: string; name: string; price: number; stock: number | null
   barcode: string | null; categoryId: string; isActive: boolean; sortOrder: number
   imageDataUrl?: string | null
+  vendorId?: string | null
 }
 
 const props = defineProps<{
   show: boolean
   categories: CategoryLike[]
+  vendors?: CategoryLike[]
   product?: ProductLike | null
   readonlyName?: boolean
   canDelete?: boolean
@@ -25,6 +27,7 @@ const emit = defineEmits<{
     stock: number | null
     barcode: string | null
     categoryId: string
+    vendorId: string | null
     imageDataUrl: string | null
     isActive: boolean
     sortOrder: number
@@ -37,6 +40,8 @@ const price = ref('')
 const stock = ref('')
 const barcode = ref('')
 const categoryId = ref('')
+const vendorId = ref('')
+const hasVendors = computed(() => (props.vendors?.length ?? 0) > 0)
 const isActive = ref(true)
 const isEditing = computed(() => !!props.product)
 const title = computed(() => isEditing.value ? LOCALE.editProduct : LOCALE.addProduct)
@@ -48,6 +53,7 @@ watch(() => props.show, (val) => {
     stock.value = props.product.stock !== null ? String(props.product.stock) : ''
     barcode.value = props.product.barcode || ''
     categoryId.value = props.product.categoryId
+    vendorId.value = props.product.vendorId || ''
     isActive.value = props.product.isActive
   } else if (val) {
     name.value = ''
@@ -55,24 +61,30 @@ watch(() => props.show, (val) => {
     stock.value = ''
     barcode.value = ''
     categoryId.value = props.categories[0]?.id || ''
+    vendorId.value = props.vendors?.length === 1 ? props.vendors[0]!.id : ''
     isActive.value = true
   }
 })
 
 function handleSave() {
-  if (!name.value.trim() || !price.value) return
+  if (!canSave.value) return
   emit('save', {
     name: name.value.trim(),
     price: Number(price.value),
     stock: stock.value ? Number(stock.value) : null,
     barcode: barcode.value.trim() || null,
     categoryId: categoryId.value,
+    vendorId: vendorId.value || null,
     imageDataUrl: props.product?.imageDataUrl || null,
     isActive: isActive.value,
     sortOrder: props.product?.sortOrder || 0,
   })
   emit('update:show', false)
 }
+
+const canSave = computed(() =>
+  !!name.value.trim() && !!price.value && (!hasVendors.value || !!vendorId.value)
+)
 
 function handleClose() {
   emit('update:show', false)
@@ -116,6 +128,24 @@ function handleClose() {
         </van-field>
 
         <van-field
+          v-if="hasVendors"
+          label="廠商"
+          required
+        >
+          <template #input>
+            <select
+              v-model="vendorId"
+              class="w-100 bg-transparent border-0 outline-none small"
+            >
+              <option value="" disabled>請選擇廠商</option>
+              <option v-for="v in vendors" :key="v.id" :value="v.id">
+                {{ v.name }}
+              </option>
+            </select>
+          </template>
+        </van-field>
+
+        <van-field
           v-model="price"
           :label="LOCALE.productPrice"
           placeholder="0"
@@ -149,7 +179,7 @@ function handleClose() {
       <div class="pt-3 d-flex flex-column gap-2">
         <button
           class="btn-accent w-100"
-          :disabled="!name.trim() || !price"
+          :disabled="!canSave"
           @click="handleSave"
         >
           {{ LOCALE.saveProduct }}

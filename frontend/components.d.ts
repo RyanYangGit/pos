@@ -12,9 +12,12 @@ declare module 'vue' {
     BarcodeScannerPopup: typeof import('./src/components/pos/BarcodeScannerPopup.vue')['default']
     CartItem: typeof import('./src/components/pos/CartItem.vue')['default']
     CartPanel: typeof import('./src/components/pos/CartPanel.vue')['default']
+    CashCountList: typeof import('./src/components/dashboard/CashCountList.vue')['default']
+    CashCountPopup: typeof import('./src/components/pos/CashCountPopup.vue')['default']
     CategoryTabs: typeof import('./src/components/pos/CategoryTabs.vue')['default']
     CheckoutModal: typeof import('./src/components/pos/CheckoutModal.vue')['default']
     DailySummary: typeof import('./src/components/dashboard/DailySummary.vue')['default']
+    LinePayConfirmModal: typeof import('./src/components/pos/LinePayConfirmModal.vue')['default']
     NetworkBanner: typeof import('./src/components/layout/NetworkBanner.vue')['default']
     OrderDetail: typeof import('./src/components/order/OrderDetail.vue')['default']
     OrderList: typeof import('./src/components/order/OrderList.vue')['default']
@@ -35,7 +38,6 @@ declare module 'vue' {
     VanField: typeof import('vant/es')['Field']
     VanIcon: typeof import('vant/es')['Icon']
     VanLoading: typeof import('vant/es')['Loading']
-    VanNumberKeyboard: typeof import('vant/es')['NumberKeyboard']
     VanPopup: typeof import('vant/es')['Popup']
     VanSwipeCell: typeof import('vant/es')['SwipeCell']
     VanSwitch: typeof import('vant/es')['Switch']
@@ -43,5 +45,6 @@ declare module 'vue' {
     VanTabbar: typeof import('vant/es')['Tabbar']
     VanTabbarItem: typeof import('vant/es')['TabbarItem']
     VanTabs: typeof import('vant/es')['Tabs']
+    VendorMonthlyReport: typeof import('./src/components/dashboard/VendorMonthlyReport.vue')['default']
   }
 }

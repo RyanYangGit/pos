@@ -33,6 +33,7 @@ export function useProducts() {
           stock: p.stock,
           barcode: p.barcode,
           categoryId: p.category_id,
+          vendorId: p.vendor_id ?? null,
           imageDataUrl: null,
           isActive: p.is_active,
           sortOrder: p.sort_order ?? 0,
@@ -76,6 +77,7 @@ export function useProducts() {
           name: data.name, price: data.price,
           stock: data.stock ?? null, barcode: data.barcode ?? null,
           category_id: data.categoryId,
+          vendor_id: data.vendorId ?? null,
           is_active: data.isActive ?? true,
           sort_order: data.sortOrder ?? 0,
         }),
@@ -96,6 +98,7 @@ export function useProducts() {
       if ('stock' in data) body.stock = data.stock
       if ('barcode' in data) body.barcode = data.barcode
       if (data.categoryId !== undefined) body.category_id = data.categoryId
+      if ('vendorId' in data) body.vendor_id = data.vendorId ?? null
       if (data.isActive !== undefined) body.is_active = data.isActive
       if (data.sortOrder !== undefined) body.sort_order = data.sortOrder
       await fetch(`/api/products/${id}`, {
@@ -135,7 +138,8 @@ export function useProducts() {
   async function importProducts(rows: Array<{
     name: string; price: number; stock: number | null
     barcode: string | null; categoryId: string
-  }>) {
+    vendorId?: string  // set only when the row names a vendor
+  }>, fallbackVendorId: string | null = null) {
     let created = 0
     let updated = 0
     for (const row of rows) {
@@ -146,11 +150,13 @@ export function useProducts() {
         await updateProduct(existing.id, {
           name: row.name, price: row.price,
           stock: row.stock, barcode: row.barcode,
+          ...(row.vendorId !== undefined ? { vendorId: row.vendorId } : {}),
         })
         updated++
       } else {
         await addProduct({
           categoryId: row.categoryId,
+          vendorId: row.vendorId ?? fallbackVendorId,
           name: row.name, price: row.price,
           stock: row.stock, barcode: row.barcode,
           imageDataUrl: null, isActive: true,

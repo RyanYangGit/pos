@@ -41,6 +41,8 @@ export function useOrders() {
             unitPrice: i.unitPrice,
             quantity: i.quantity,
             subtotal: i.subtotal,
+            vendorId: i.vendorId ?? null,
+            vendorName: i.vendorName ?? null,
           })),
           totalAmount: o.totalAmount,
           paymentMethod: o.paymentMethod,
@@ -76,6 +78,8 @@ export function useOrders() {
                   unitPrice: i.unitPrice,
                   quantity: i.quantity,
                   subtotal: i.subtotal,
+                  vendorId: i.vendorId ?? null,
+                  vendorName: i.vendorName ?? null,
                 })),
                 totalAmount: order.totalAmount,
                 paymentMethod: order.paymentMethod,
@@ -133,6 +137,15 @@ export function useOrders() {
 
     const orderNumber = generateOrderNumber(settings.orderPrefix, seq, today)
 
+    // Record each item's vendor as of now, so sales stay with the right vendor (works offline).
+    const vendorOf = new Map<string, { vendorId: string | null; vendorName: string | null }>()
+    for (const item of cartItems) {
+      const product = await db.products.findOne(item.productId).exec()
+      const vendorId: string | null = product?.vendorId ?? null
+      const vendor = vendorId ? await db.vendors.findOne(vendorId).exec() : null
+      vendorOf.set(item.productId, { vendorId, vendorName: vendor?.name ?? null })
+    }
+
     await settings.patch({
       nextOrderSeq: seq + 1,
       lastOrderDate: today,
@@ -147,6 +160,7 @@ export function useOrders() {
         unitPrice: item.unitPrice,
         quantity: item.quantity,
         subtotal: item.subtotal,
+        ...vendorOf.get(item.productId),
       })),
       totalAmount,
       paymentMethod,

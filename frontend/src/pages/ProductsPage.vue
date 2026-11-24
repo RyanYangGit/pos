@@ -4,6 +4,7 @@ import { showConfirmDialog, showSuccessToast, showFailToast } from 'vant'
 import { LOCALE } from '@/constants/locale'
 import { useCategories } from '@/composables/useCategories'
 import { useProducts } from '@/composables/useProducts'
+import { useVendors } from '@/composables/useVendors'
 import { useAuth } from '@/composables/useAuth'
 import { authHeaders } from '@/utils/token'
 import type { ProductDoc } from '@/db/schemas/product'
@@ -14,6 +15,10 @@ const { userRole } = useAuth()
 const isAdmin = computed(() => userRole.value === 'admin' || userRole.value === 'super_admin')
 const { categories, addCategory, updateCategory, deleteCategory } = useCategories()
 const { products, addProduct, updateProduct, deleteProduct, toggleProduct, importProducts } = useProducts()
+const { vendors, addVendor, renameVendor, deleteVendor } = useVendors()
+const vendorNames = computed<Record<string, string>>(() =>
+  Object.fromEntries(vendors.value.map(v => [v.id, v.name]))
+)
 
 async function logProductChange(productId: string, productName: string, action: string, changes: Record<string, any>) {
   try {
@@ -37,11 +42,13 @@ interface ImportRow {
   stock: number | null
   barcode: string | null
   category: string | null
+  vendor: string | null
 }
 
 const showImportDialog = ref(false)
 const importRows = ref<ImportRow[]>([])
 const importCategoryId = ref('')
+const importVendorId = ref('')
 const importLoading = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
@@ -77,6 +84,7 @@ function handleFileChange(e: Event) {
         stock: header.findIndex((h: string) => h.includes('庫存')),
         barcode: header.findIndex((h: string) => h.includes('條碼')),
         category: header.findIndex((h: string) => h.includes('分類')),
+        vendor: header.findIndex((h: string) => h.includes('廠商')),
       }
 
       if (colIdx.name < 0 || colIdx.price < 0) {
@@ -100,7 +108,10 @@ function handleFileChange(e: Event) {
         const category = colIdx.category >= 0 && row[colIdx.category]
           ? String(row[colIdx.category]).trim() || null
           : null
-        parsed.push({ name, price, stock, barcode, category })
+        const vendor = colIdx.vendor >= 0 && row[colIdx.vendor]
+          ? String(row[colIdx.vendor]).trim() || null
+          : null
+        parsed.push({ name, price, stock, barcode, category, vendor })
       }
 
       if (parsed.length === 0) {
@@ -115,6 +126,7 @@ function handleFileChange(e: Event) {
         // addCategory already reloads categories
       }
       importCategoryId.value = categories.value[0]?.id ?? ''
+      importVendorId.value = vendors.value.length === 1 ? vendors.value[0]!.id : ''
       showImportDialog.value = true
     } catch {
       showFailToast('讀取 Excel 失敗')
@@ -161,12 +173,30 @@ async function handleConfirmImport() {
       }
     }
 
-    // Map rows with per-row category
+    // Vendors: map names → id, auto-create missing ones (needs network)
+    const vendorMap = new Map<string, string>(vendors.value.map(v => [v.name, v.id]))
+    for (const row of importRows.value) {
+      if (row.vendor && !vendorMap.has(row.vendor)) {
+        const v = await addVendor(row.vendor)
+        vendorMap.set(v.name, v.id)
+      }
+    }
+    const fallbackVendorId = importVendorId.value || null
+    if (vendorMap.size > 0 && !fallbackVendorId && importRows.value.some(r => !r.vendor)) {
+      showFailToast('請選擇未指定廠商的商品要歸入哪個廠商')
+      importLoading.value = false
+      return
+    }
+
+    // Map rows with per-row category and vendor. Existing products keep their vendor
+    // unless the row names one explicitly.
     const { created, updated } = await importProducts(
       importRows.value.map(r => ({
         ...r,
         categoryId: (r.category && categoryMap.get(r.category)) || importCategoryId.value,
-      }))
+        vendorId: r.vendor ? vendorMap.get(r.vendor)! : undefined,
+      })),
+      fallbackVendorId,
     )
     showImportDialog.value = false
     showSuccessToast(`新增 ${created} 筆，更新 ${updated} 筆`)
@@ -184,10 +214,14 @@ const showCategoryDialog = ref(false)
 const newCategoryName = ref('')
 const activeTab = ref(0)
 const sortByStock = ref(false)
+const vendorFilter = ref('')  // '' = all
 
 const sortedProducts = computed(() => {
-  if (!sortByStock.value) return products.value
-  return [...products.value].sort((a, b) => {
+  const list = vendorFilter.value
+    ? products.value.filter(p => p.vendorId === vendorFilter.value)
+    : products.value
+  if (!sortByStock.value) return list
+  return [...list].sort((a, b) => {
     // null stock (unlimited) goes to bottom
     if (a.stock === null && b.stock === null) return 0
     if (a.stock === null) return 1
@@ -208,8 +242,8 @@ function handleEditProduct(product: ProductDoc) {
 
 async function handleSaveProduct(data: {
   name: string; price: number; stock: number | null;
-  barcode: string | null; categoryId: string; imageDataUrl: string | null;
-  isActive: boolean; sortOrder: number;
+  barcode: string | null; categoryId: string; vendorId: string | null;
+  imageDataUrl: string | null; isActive: boolean; sortOrder: number;
 }) {
   if (editingProduct.value) {
     const old = editingProduct.value
@@ -218,6 +252,12 @@ async function handleSaveProduct(data: {
     if (data.stock !== old.stock) changes.stock = { from: old.stock, to: data.stock }
     if (data.barcode !== old.barcode) changes.barcode = { from: old.barcode, to: data.barcode }
     if (data.categoryId !== old.categoryId) changes.categoryId = { from: old.categoryId, to: data.categoryId }
+    if (data.vendorId !== (old.vendorId ?? null)) {
+      changes.vendor = {
+        from: old.vendorId ? vendorNames.value[old.vendorId] ?? old.vendorId : null,
+        to: data.vendorId ? vendorNames.value[data.vendorId] ?? data.vendorId : null,
+      }
+    }
     if (data.isActive !== old.isActive) changes.isActive = { from: old.isActive, to: data.isActive }
     if (data.name !== old.name) changes.name = { from: old.name, to: data.name }
 
@@ -261,10 +301,10 @@ async function handleToggleProduct(id: string) {
 async function downloadTemplate() {
   const XLSX = await import('xlsx')
   const ws = XLSX.utils.aoa_to_sheet([
-    ['品名', '價格', '庫存', '條碼', '分類'],
-    ['範例商品', 100, 10, '4710000000001', '飲料'],
+    ['品名', '價格', '庫存', '條碼', '分類', '廠商'],
+    ['範例商品', 100, 10, '4710000000001', '飲料', vendors.value[0]?.name ?? '布漾'],
   ])
-  ws['!cols'] = [{ wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 16 }, { wch: 12 }]
+  ws['!cols'] = [{ wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 16 }, { wch: 12 }, { wch: 12 }]
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, '商品匯入範本')
   XLSX.writeFile(wb, '商品匯入範本.xlsx')
@@ -275,6 +315,44 @@ async function handleAddCategory() {
   await addCategory(newCategoryName.value.trim())
   newCategoryName.value = ''
   showSuccessToast('已新增')
+}
+
+// --- Vendors ---
+const newVendorName = ref('')
+
+async function handleAddVendor() {
+  const name = newVendorName.value.trim()
+  if (!name) return
+  try {
+    await addVendor(name)
+    newVendorName.value = ''
+    showSuccessToast('已新增')
+  } catch (e: any) {
+    showFailToast(e?.message || '新增失敗')
+  }
+}
+
+async function handleRenameVendor(id: string, current: string) {
+  const name = window.prompt('廠商名稱', current)?.trim()
+  if (!name || name === current) return
+  try {
+    await renameVendor(id, name)
+    showSuccessToast('已修改')
+  } catch (e: any) {
+    showFailToast(e?.message || '修改失敗')
+  }
+}
+
+async function handleDeleteVendor(id: string) {
+  try {
+    await showConfirmDialog({ title: '確定要刪除此廠商嗎？' })
+  } catch { return }
+  try {
+    await deleteVendor(id)
+    showSuccessToast('已刪除')
+  } catch (e: any) {
+    showFailToast(e?.message || '刪除失敗')
+  }
 }
 
 async function handleDeleteCategory(id: string) {
@@ -313,6 +391,20 @@ async function handleDeleteCategory(id: string) {
               範本
             </button>
           </div>
+          <div v-if="vendors.length > 1" class="d-flex flex-wrap gap-2 mb-2">
+            <button
+              class="cat-chip"
+              :class="vendorFilter === '' ? 'cat-chip--active' : ''"
+              @click="vendorFilter = ''"
+            >全部廠商</button>
+            <button
+              v-for="v in vendors"
+              :key="v.id"
+              class="cat-chip"
+              :class="vendorFilter === v.id ? 'cat-chip--active' : ''"
+              @click="vendorFilter = v.id"
+            >{{ v.name }}</button>
+          </div>
           <div class="d-flex mb-3">
             <button
               class="btn-sort d-flex align-items-center gap-1"
@@ -326,6 +418,7 @@ async function handleDeleteCategory(id: string) {
           <ProductList
             :products="sortedProducts"
             :categories="categories"
+            :vendor-names="vendors.length > 1 ? vendorNames : undefined"
             :can-delete="isAdmin"
             @edit="handleEditProduct"
             @toggle="handleToggleProduct"
@@ -334,6 +427,36 @@ async function handleDeleteCategory(id: string) {
         </div>
       </van-tab>
 
+      <van-tab v-if="isAdmin" title="廠商管理">
+        <div class="p-3 d-flex flex-column gap-3">
+          <div class="d-flex gap-2">
+            <van-field
+              v-model="newVendorName"
+              placeholder="廠商名稱"
+              class="flex-grow-1 rounded"
+            />
+            <button
+              class="flex-shrink-0 btn-accent"
+              :disabled="!newVendorName.trim()"
+              @click="handleAddVendor"
+            >
+              新增廠商
+            </button>
+          </div>
+          <div v-if="vendors.length === 0" class="small text-muted px-1">尚未建立廠商</div>
+          <div v-for="v in vendors" :key="v.id" class="d-flex align-items-center px-3 py-3 bg-white rounded">
+            <span class="flex-grow-1 small fw-medium text-primary">{{ v.name }}</span>
+            <span class="extra-small text-muted me-3">{{ v.productCount }} 個商品</span>
+            <button class="btn-icon-delete me-1" @click="handleRenameVendor(v.id, v.name)">
+              <van-icon name="edit" size="18" />
+            </button>
+            <button class="btn-icon-delete" @click="handleDeleteVendor(v.id)">
+              <van-icon name="delete-o" size="18" />
+            </button>
+          </div>
+          <div class="extra-small text-muted px-1">每個商品屬於一個廠商；報表頁的「廠商月報」會依廠商分開計算。</div>
+        </div>
+      </van-tab>
       <van-tab v-if="isAdmin" :title="LOCALE.categoryManage">
         <div class="p-3 d-flex flex-column gap-3">
           <div class="d-flex gap-2">
@@ -367,6 +490,7 @@ async function handleDeleteCategory(id: string) {
     <ProductForm
       v-model:show="showProductForm"
       :categories="categories"
+      :vendors="vendors"
       :product="editingProduct"
       :readonly-name="!isAdmin"
       :can-delete="isAdmin"
@@ -410,6 +534,20 @@ async function handleDeleteCategory(id: string) {
           </div>
         </div>
 
+        <div v-if="vendors.length > 0 || importRows.some(r => r.vendor)">
+          <div class="small text-muted mb-2">未指定廠商的商品歸入</div>
+          <div class="d-flex flex-wrap gap-2">
+            <button
+              v-for="v in vendors"
+              :key="v.id"
+              class="cat-chip"
+              :class="importVendorId === v.id ? 'cat-chip--active' : ''"
+              @click="importVendorId = v.id"
+            >
+              {{ v.name }}
+            </button>
+          </div>
+        </div>
         <!-- Preview list -->
         <div class="import-preview overflow-auto border rounded">
           <div
@@ -419,6 +557,7 @@ async function handleDeleteCategory(id: string) {
             :class="{ 'border-top': i > 0 }"
           >
             <span class="flex-grow-1 fw-medium text-primary text-truncate">{{ row.name }}</span>
+            <span v-if="row.vendor" class="extra-small text-muted flex-shrink-0">{{ row.vendor }}</span>
             <span v-if="row.category" class="extra-small text-muted flex-shrink-0">{{ row.category }}</span>
             <span v-if="row.barcode" class="extra-small text-muted font-monospace flex-shrink-0">{{ row.barcode }}</span>
             <span class="text-primary flex-shrink-0">NT${{ row.price }}</span>
@@ -429,7 +568,7 @@ async function handleDeleteCategory(id: string) {
         </div>
 
         <div class="extra-small text-muted">
-          已有相同條碼的商品會自動更新；無條碼則依品名比對。Excel 有「分類」欄位會自動建立分類。
+          已有相同條碼的商品會自動更新；無條碼則依品名比對。Excel 有「分類」「廠商」欄位會自動建立。已有商品只有在該列填了廠商時才會改廠商。
         </div>
 
         <div class="d-flex gap-3">

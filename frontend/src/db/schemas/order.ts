@@ -6,6 +6,9 @@ export interface OrderItem {
   unitPrice: number
   quantity: number
   subtotal: number
+  // Vendor snapshot at checkout; absent on orders made before vendors existed.
+  vendorId?: string | null
+  vendorName?: string | null
 }
 
 export interface OrderDoc {

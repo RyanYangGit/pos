@@ -7,6 +7,7 @@ import type { CategoryDoc } from '@/db/schemas/category'
 defineProps<{
   products: ProductDoc[]
   categories: CategoryDoc[]
+  vendorNames?: Record<string, string>
   canDelete?: boolean
 }>()
 
@@ -35,6 +36,7 @@ function getCategoryName(categoryId: string, categories: CategoryDoc[]): string 
         <div class="flex-grow-1 min-w-0">
           <div class="small fw-medium text-primary text-truncate">{{ product.name }}</div>
           <div class="extra-small text-muted mt-1">
+            <span v-if="vendorNames && product.vendorId && vendorNames[product.vendorId]" class="vendor-tag">{{ vendorNames[product.vendorId] }}</span>
             {{ getCategoryName(product.categoryId, categories) }}
             <span v-if="product.stock !== null"> · 庫存 {{ product.stock }}</span>
             <span v-if="!product.isActive"> · 已下架</span>
@@ -99,5 +101,14 @@ function getCategoryName(categoryId: string, categories: CategoryDoc[]): string 
   border-radius: var(--radius-sm);
   background-color: var(--c-surface);
   font-size: 1.125rem;
+}
+.vendor-tag {
+  display: inline-block;
+  padding: 0 6px;
+  margin-right: 4px;
+  border-radius: 4px;
+  background-color: #eef2ff;
+  color: #4338ca;
+  font-weight: 500;
 }
 </style>

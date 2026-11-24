@@ -7,6 +7,7 @@ import DailySummary from '@/components/dashboard/DailySummary.vue'
 import PaymentBreakdown from '@/components/dashboard/PaymentBreakdown.vue'
 import TopProducts from '@/components/dashboard/TopProducts.vue'
 import CashCountList from '@/components/dashboard/CashCountList.vue'
+import VendorMonthlyReport from '@/components/dashboard/VendorMonthlyReport.vue'
 import type { CashCountItem } from '@/components/dashboard/CashCountList.vue'
 
 const {
@@ -182,6 +183,8 @@ const maxDate = new Date()
       <TopProducts :products="topProducts" />
 
       <CashCountList :items="cashCounts" />
+
+      <VendorMonthlyReport />
     </div>
 
     <!-- Date picker popup -->

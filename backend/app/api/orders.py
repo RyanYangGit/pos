@@ -23,6 +23,8 @@ class OrderItemResponse(BaseModel):
     unitPrice: int
     quantity: int
     subtotal: int
+    vendorId: Optional[str] = None
+    vendorName: Optional[str] = None
 
 
 class OrderResponse(BaseModel):
@@ -53,6 +55,8 @@ def _order_to_response(r: Order) -> OrderResponse:
                 unitPrice=item.unit_price,
                 quantity=item.quantity,
                 subtotal=item.subtotal,
+                vendorId=item.vendor_id,
+                vendorName=item.vendor_name,
             )
             for item in r.items
         ],

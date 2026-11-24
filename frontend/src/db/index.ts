@@ -129,6 +129,7 @@ function createCollection(name: string) {
 const mockDb = {
   categories: createCollection('categories'),
   products: createCollection('products'),
+  vendors: createCollection('vendors'),
   orders: createCollection('orders'),
   app_settings: createCollection('app_settings'),
   users: createCollection('users'),

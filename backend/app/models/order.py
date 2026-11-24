@@ -32,5 +32,8 @@ class OrderItem(Base):
     unit_price: Mapped[int] = mapped_column(Integer)
     quantity: Mapped[int] = mapped_column(Integer)
     subtotal: Mapped[int] = mapped_column(Integer)
+    # Snapshot of the product's vendor at sale time, so later product edits don't move past sales.
+    vendor_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    vendor_name: Mapped[str | None] = mapped_column(String(255), nullable=True, default=None)
 
     order: Mapped["Order"] = relationship(back_populates="items")
