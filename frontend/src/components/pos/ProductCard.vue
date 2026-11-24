@@ -14,8 +14,6 @@ const emit = defineEmits<{
 <template>
   <button
     class="btn d-flex flex-column align-items-center justify-content-center border rounded p-3 product-card"
-    :class="{ 'opacity-50': product.stock === 0 }"
-    :disabled="product.stock === 0"
     @click="emit('tap', product)"
   >
     <span class="small text-center product-name">
@@ -27,8 +25,13 @@ const emit = defineEmits<{
     <span class="fw-bold mt-1 product-price">
       {{ formatCurrency(product.price) }}
     </span>
-    <span v-if="product.stock !== null" class="product-stock mt-1">
-      {{ product.stock === 0 ? '售完' : `剩 ${product.stock}` }}
+    <!-- Stock is informational only: goods on hand can always be sold, so it may go negative. -->
+    <span
+      v-if="product.stock !== null"
+      class="product-stock mt-1"
+      :class="{ 'product-stock--low': product.stock <= 0 }"
+    >
+      剩 {{ product.stock }}
     </span>
   </button>
 </template>
@@ -76,5 +79,8 @@ const emit = defineEmits<{
 .product-stock {
   font-size: 0.75rem;
   color: var(--c-text-muted);
+}
+.product-stock--low {
+  color: var(--c-accent);
 }
 </style>

@@ -178,7 +178,7 @@ export function useOrders() {
     for (const item of cartItems) {
       const product = await db.products.findOne(item.productId).exec()
       if (product && product.stock !== null) {
-        const newStock = Math.max(0, product.stock - item.quantity)
+        const newStock = product.stock - item.quantity  // may go negative: sell whatever is on hand
         await product.patch({ stock: newStock, updatedAt: Date.now() })
         // Push stock to server
         try {
