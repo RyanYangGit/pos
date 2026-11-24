@@ -212,11 +212,13 @@ async function exportExcel() {
 
 .report-table { font-size: 0.8125rem; border-collapse: collapse; }
 .report-table th {
+  white-space: nowrap;
   color: var(--c-text-muted);
   font-weight: 500;
   padding: 4px 0 6px;
   border-bottom: 1px solid var(--c-border);
 }
+.report-table td:first-child { width: 100%; }
 .report-table td { padding: 6px 0; color: var(--c-text); border-bottom: 1px solid var(--c-surface); }
 .report-table td + td, .report-table th + th { padding-left: 12px; }
 .report-table tfoot td { font-weight: 700; border-bottom: none; border-top: 1px solid var(--c-border); }

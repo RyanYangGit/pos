@@ -24,7 +24,8 @@ function onTabChange(index: number) {
 </script>
 
 <template>
-  <van-tabbar :model-value="activeIndex" @change="onTabChange" :safe-area-inset-bottom="true" :border="true">
+  <!-- Not fixed: sits in the flex column so it never covers the bottom of the page -->
+  <van-tabbar :model-value="activeIndex" :fixed="false" @change="onTabChange" :safe-area-inset-bottom="true" :border="true" class="flex-shrink-0">
     <van-tabbar-item v-for="tab in tabs" :key="tab.path" :icon="tab.icon">
       {{ tab.label }}
     </van-tabbar-item>

@@ -11,19 +11,19 @@ defineProps<{
 
 <template>
   <div class="daily-summary row g-3">
-    <div class="col-4">
+    <div class="col-12 col-md-4">
       <div class="bg-white rounded p-3 text-center">
         <div class="extra-small text-muted mb-1">{{ LOCALE.totalRevenue }}</div>
         <div class="fs-5 fw-bold text-accent num">{{ formatCurrency(totalRevenue) }}</div>
       </div>
     </div>
-    <div class="col-4">
+    <div class="col-6 col-md-4">
       <div class="bg-white rounded p-3 text-center">
         <div class="extra-small text-muted mb-1">{{ LOCALE.totalTransactions }}</div>
         <div class="fs-5 fw-bold text-primary num">{{ totalTransactions }}</div>
       </div>
     </div>
-    <div class="col-4">
+    <div class="col-6 col-md-4">
       <div class="bg-white rounded p-3 text-center">
         <div class="extra-small text-muted mb-1">{{ LOCALE.avgTransaction }}</div>
         <div class="fs-5 fw-bold text-primary num">{{ formatCurrency(avgTransaction) }}</div>
@@ -49,5 +49,5 @@ defineProps<{
 .text-primary { color: var(--c-text) !important; }
 .text-muted { color: var(--c-text-muted) !important; }
 .extra-small { font-size: 0.75rem; }
-.num { font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 </style>
